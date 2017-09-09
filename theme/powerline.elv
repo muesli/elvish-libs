@@ -16,7 +16,7 @@
 # of the following:
 #
 # - The name of one of the built-in segments. Available segments:
-#     `newline` `user` `host` `arrow` `timestamp` `su` `dir`
+#     `newline` `user` `host` `arrow` `timestamp` `dir`
 #     `git_branch` `git_ahead` `git_behind` `git_staged` `git_dirty` `git_untracked`
 # - A string or the output of `edit:styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
@@ -27,7 +27,7 @@
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt_segments = [ user host dir git_branch git_ahead git_behind git_staged git_dirty git_untracked newline su timestamp arrow ]
+prompt_segments = [ user host dir git_branch git_ahead git_behind git_staged git_dirty git_untracked newline timestamp arrow ]
 rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
@@ -50,7 +50,7 @@ glyph = [
 # Styling for each built-in segment. The value must be a valid argument to `edit:styled`
 segment_style_fg = [
 	&arrow= "15"
-	&su= "250"
+	&su= "15"
 	&cache= "15"
 	&dir= "15"
 	&user= "250"
@@ -66,7 +66,7 @@ segment_style_fg = [
 
 segment_style_bg = [
 	&arrow= "236"
-	&su= "124"
+	&su= "161"
 	&cache= "31"
 	&dir= "31"
 	&user= "240"
@@ -207,13 +207,6 @@ fn segment_newline {
   put "\n"
 }
 
-fn segment_su {
-	uid = (id -u)
-	if (eq $uid $root_id) {
-		prompt_segment $segment_style_fg[su] $segment_style_bg[su] $glyph[su]
-	}
-}
-
 fn segment_cache {
   if $cache_chain {
     prompt_segment $segment_style_fg[cache] $segment_style_bg[cache] $glyph[cache]
@@ -275,7 +268,12 @@ fn segment_git_untracked {
 }
 
 fn segment_arrow {
-	prompt_segment $segment_style_fg[arrow] $segment_style_bg[arrow] $glyph[arrow]
+	uid = (id -u)
+	if (eq $uid $root_id) {
+		prompt_segment $segment_style_fg[su] $segment_style_bg[su] $glyph[su]
+	} else {
+		prompt_segment $segment_style_fg[arrow] $segment_style_bg[arrow] $glyph[arrow]
+	}
 }
 
 fn segment_timestamp {
@@ -285,7 +283,6 @@ fn segment_timestamp {
 # List of built-in segments
 segment = [
 	&newline= $&segment_newline
-	&su= $&segment_su
 	&cache= $&segment_cache
 	&dir= $&segment_dir
 	&user= $&segment_user
@@ -333,7 +330,7 @@ fn -build-chain [segments]{
 	  if (> (count $output) 0) {
 		  if (not $first) {
         if (not (eq $seg "newline")) {
-          -colorprint $glyph[chain] $lbg $segment_style_bg[$seg]
+          -colorprint $glyph[chain] $lbg $last_bg
         } else {
           -colorprint $glyph[chain] $lbg "0"
         }
