@@ -26,7 +26,7 @@
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt_segments = [ user host dir git_branch git_dirty newline su timestamp arrow ]
+prompt_segments = [ user host dir git_branch git_ahead git_dirty newline su timestamp arrow ]
 rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
@@ -35,7 +35,8 @@ glyph = [
 	&suffix= " "
 	&arrow= "$"
 	&git_branch= "⎇"
-	&git_dirty= "±"
+	&git_ahead= "\u2B06"
+	&git_dirty= "\u270E"
 	&su= "⚡"
   &cache= "∼"
 	&chain= ""
@@ -51,6 +52,7 @@ segment_style_fg = [
 	&user= "250"
 	&host= "254"
 	&git_branch= "0"
+	&git_ahead= "15"
 	&git_dirty= "15"
 	&timestamp= "250"
 ]
@@ -63,6 +65,7 @@ segment_style_bg = [
 	&user= "240"
 	&host= "166"
 	&git_branch= "148"
+	&git_ahead= "52"
 	&git_dirty= "161"
 	&timestamp= "238"
 ]
@@ -133,11 +136,18 @@ fn -git_branch_name {
   put $out
 }
 
-# Return whether the current git repo is "dirty" (modified in any way)
-fn -git_is_dirty {
+# Return how many commits this repo is ahead of master
+fn -git_ahead_count {
+  out = []
+  err = ?(out = [(git cherry 2>/dev/null | grep "+")])
+  count $out
+}
+
+# Return how many files in the current git repo are "dirty" (modified in any way)
+fn -git_dirty_count {
   out = []
   err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null)])
-  > (count $out) 0
+  count $out
 }
 
 # Return the current directory, shortened according to `$prompt_pwd_dir_length`
@@ -189,9 +199,17 @@ fn segment_git_branch {
   }
 }
 
+fn segment_git_ahead {
+  changecount = (-git_ahead_count)
+	if (> $changecount 0) {
+	  prompt_segment $segment_style_fg[git_ahead] $segment_style_bg[git_ahead] $changecount$glyph[git_ahead]
+	}
+}
+
 fn segment_git_dirty {
-	if (-git_is_dirty) {
-	  prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $glyph[git_dirty]
+  changecount = (-git_dirty_count)
+	if (> $changecount 0) {
+	  prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $changecount$glyph[git_dirty]
 	}
 }
 
@@ -212,6 +230,7 @@ segment = [
 	&user= $&segment_user
 	&host= $&segment_host
 	&git_branch= $&segment_git_branch
+	&git_ahead= $&segment_git_ahead
 	&git_dirty= $&segment_git_dirty
 	&arrow= $&segment_arrow
 	&timestamp= $&segment_timestamp
