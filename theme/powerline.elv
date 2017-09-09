@@ -27,7 +27,20 @@
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt_segments = [ user host dir git_branch git_ahead git_behind git_staged git_dirty git_untracked newline timestamp arrow ]
+prompt_segments = [
+	user
+	host
+	dir
+	git_branch
+	git_ahead
+	git_behind
+	git_staged
+	git_dirty
+	git_untracked
+	newline
+	timestamp
+	arrow
+]
 rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
@@ -49,35 +62,35 @@ glyph = [
 
 # Styling for each built-in segment. The value must be a valid argument to `edit:styled`
 segment_style_fg = [
-	&arrow= "15"			// white
-	&su= "15"				// white
-	&cache= "15"			// white
-	&dir= "15"				// white
-	&user= "250"			// gray
-	&host= "254"			// white
-	&git_branch= "0"		// black
-	&git_ahead= "15"		// white
-	&git_behind= "15"		// white
-	&git_staged= "15"		// white
-	&git_dirty= "15"		// white
-	&git_untracked= "15"	// white
-	&timestamp= "250"		// white
+	&arrow= "15"
+	&su= "15"
+	&cache= "15"
+	&dir= "15"
+	&user= "250"
+	&host= "254"
+	&git_branch= "0"
+	&git_ahead= "15"
+	&git_behind= "15"
+	&git_staged= "15"
+	&git_dirty= "15"
+	&git_untracked= "15"
+	&timestamp= "250"
 ]
 
 segment_style_bg = [
-	&arrow= "22"			// green
-	&su= "161"				// pink
-	&cache= "31"			// blue
-	&dir= "31"				// blue
-	&user= "240" 			// gray
-	&host= "166" 			// orange
-	&git_branch= "148"		// lime
-	&git_ahead= "52"		// dark red
-	&git_behind= "52"		// dark red
-	&git_staged= "22"		// green
-	&git_dirty= "161"		// pink
-	&git_untracked= "52"	// dark red
-	&timestamp= "238"		// gray
+	&arrow= "22"
+	&su= "161"
+	&cache= "31"
+	&dir= "31"
+	&user= "240"
+	&host= "166"
+	&git_branch= "148"
+	&git_ahead= "52"
+	&git_behind= "52"
+	&git_staged= "22"
+	&git_dirty= "161"
+	&git_untracked= "52"
+	&timestamp= "238"
 ]
 
 # To how many letters to abbreviate directories in the path - 0 to show in full
