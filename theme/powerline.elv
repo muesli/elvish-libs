@@ -26,25 +26,25 @@
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt_segments = [ host dir git_branch git_dirty newline su user timestamp arrow ]
+prompt_segments = [ user host dir git_branch git_dirty newline su timestamp arrow ]
 rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
 glyph = [
 	&prefix= " "
 	&suffix= " "
-	&arrow= ""
+	&arrow= "$"
 	&git_branch= "⎇"
 	&git_dirty= "±"
 	&su= "⚡"
   &cache= "∼"
 	&chain= ""
-	&dirchain= "  "
+	&dirchain= ""
 ]
 
 # Styling for each built-in segment. The value must be a valid argument to `edit:styled`
 segment_style_fg = [
-	&arrow= "0"
+	&arrow= "15"
 	&su= "250"
 	&cache= "15"
 	&dir= "15"
@@ -56,7 +56,7 @@ segment_style_fg = [
 ]
 
 segment_style_bg = [
-	&arrow= "0"
+	&arrow= "236"
 	&su= "124"
 	&cache= "31"
 	&dir= "31"
@@ -196,7 +196,7 @@ fn segment_git_dirty {
 }
 
 fn segment_arrow {
-	edit:styled $glyph[arrow]" " $segment_style_fg[arrow]
+	prompt_segment $segment_style_fg[arrow] $segment_style_bg[arrow] $glyph[arrow]
 }
 
 fn segment_timestamp {
@@ -263,6 +263,7 @@ fn -build-chain [segments]{
       }
 	  }
 	}
+  -colorprint $glyph[chain]" " $last_bg "0"
 }
 
 # Check if the time exceeds the threshold for enabling/disabling
@@ -277,7 +278,7 @@ fn -check_time_for_enabling_caching [t]{
   if (>= $ms $auto_cache_threshold_ms) {
     if (not $cache_chain) {
       -log Chain build took $ms - enabling prompt caching
-      theme:chain:cache $true
+      theme:powerline:cache $true
       edit:redraw
     }
   }
@@ -288,7 +289,7 @@ fn -check_time_for_disabling_caching [t]{
   if (< $ms $auto_cache_threshold_ms) {
     if $cache_chain {
       -log Chain build took $ms - disabling prompt caching
-      theme:chain:cache $false
+      theme:powerline:cache $false
       edit:redraw
     }
   }
