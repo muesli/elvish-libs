@@ -16,7 +16,8 @@
 # of the following:
 #
 # - The name of one of the built-in segments. Available segments:
-#     `newline` `user` `host` `arrow` `timestamp` `su` `dir` `git_branch` `git_dirty`
+#     `newline` `user` `host` `arrow` `timestamp` `su` `dir`
+#     `git_branch` `git_ahead` `git_staged` `git_dirty` `git_untracked`
 # - A string or the output of `edit:styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
 # - The output of a call to `theme:powerline:segment <style> <strings>`, which returns a "proper"
@@ -26,7 +27,7 @@
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt_segments = [ user host dir git_branch git_ahead git_dirty newline su timestamp arrow ]
+prompt_segments = [ user host dir git_branch git_ahead git_staged git_dirty git_untracked newline su timestamp arrow ]
 rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
@@ -36,7 +37,9 @@ glyph = [
 	&arrow= "$"
 	&git_branch= "⎇"
 	&git_ahead= "\u2B06"
+	&git_staged= "\u2714"
 	&git_dirty= "\u270E"
+	&git_untracked= "+"
 	&su= "⚡"
   &cache= "∼"
 	&chain= ""
@@ -53,7 +56,9 @@ segment_style_fg = [
 	&host= "254"
 	&git_branch= "0"
 	&git_ahead= "15"
+	&git_staged= "15"
 	&git_dirty= "15"
+	&git_untracked= "15"
 	&timestamp= "250"
 ]
 
@@ -66,7 +71,9 @@ segment_style_bg = [
 	&host= "166"
 	&git_branch= "148"
 	&git_ahead= "52"
+	&git_staged= "22"
 	&git_dirty= "161"
+	&git_untracked= "52"
 	&timestamp= "238"
 ]
 
@@ -139,14 +146,28 @@ fn -git_branch_name {
 # Return how many commits this repo is ahead of master
 fn -git_ahead_count {
   out = []
-  err = ?(out = [(git cherry 2>/dev/null | grep "+")])
+  err = ?(out = [(git cherry 2>/dev/null | grep "+ ")])
+  count $out
+}
+
+# Return how many files in the current git repo are staged
+fn -git_staged_count {
+  out = []
+  err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
   count $out
 }
 
 # Return how many files in the current git repo are "dirty" (modified in any way)
 fn -git_dirty_count {
   out = []
-  err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null)])
+  err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "M ")])
+  count $out
+}
+
+# Return how many files in the current git repo are untracked
+fn -git_untracked_count {
+  out = []
+  err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "?? ")])
   count $out
 }
 
@@ -206,10 +227,24 @@ fn segment_git_ahead {
 	}
 }
 
+fn segment_git_staged {
+  changecount = (-git_staged_count)
+	if (> $changecount 0) {
+	  prompt_segment $segment_style_fg[git_staged] $segment_style_bg[git_staged] $changecount$glyph[git_staged]
+	}
+}
+
 fn segment_git_dirty {
   changecount = (-git_dirty_count)
 	if (> $changecount 0) {
 	  prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $changecount$glyph[git_dirty]
+	}
+}
+
+fn segment_git_untracked {
+  changecount = (-git_untracked_count)
+	if (> $changecount 0) {
+	  prompt_segment $segment_style_fg[git_untracked] $segment_style_bg[git_untracked] $changecount$glyph[git_untracked]
 	}
 }
 
@@ -231,7 +266,9 @@ segment = [
 	&host= $&segment_host
 	&git_branch= $&segment_git_branch
 	&git_ahead= $&segment_git_ahead
+	&git_staged= $&segment_git_staged
 	&git_dirty= $&segment_git_dirty
+	&git_untracked= $&segment_git_untracked
 	&arrow= $&segment_arrow
 	&timestamp= $&segment_timestamp
 ]
