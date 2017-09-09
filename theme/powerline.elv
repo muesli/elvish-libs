@@ -17,7 +17,7 @@
 #
 # - The name of one of the built-in segments. Available segments:
 #     `newline` `user` `host` `arrow` `timestamp` `su` `dir`
-#     `git_branch` `git_ahead` `git_staged` `git_dirty` `git_untracked`
+#     `git_branch` `git_ahead` `git_behind` `git_staged` `git_dirty` `git_untracked`
 # - A string or the output of `edit:styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
 # - The output of a call to `theme:powerline:segment <style> <strings>`, which returns a "proper"
@@ -27,7 +27,7 @@
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt_segments = [ user host dir git_branch git_ahead git_staged git_dirty git_untracked newline su timestamp arrow ]
+prompt_segments = [ user host dir git_branch git_ahead git_behind git_staged git_dirty git_untracked newline su timestamp arrow ]
 rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
@@ -37,6 +37,7 @@ glyph = [
 	&arrow= "$"
 	&git_branch= "⎇"
 	&git_ahead= "\u2B06"
+	&git_behind= "\u2B07"
 	&git_staged= "\u2714"
 	&git_dirty= "\u270E"
 	&git_untracked= "+"
@@ -56,6 +57,7 @@ segment_style_fg = [
 	&host= "254"
 	&git_branch= "0"
 	&git_ahead= "15"
+	&git_behind= "15"
 	&git_staged= "15"
 	&git_dirty= "15"
 	&git_untracked= "15"
@@ -71,6 +73,7 @@ segment_style_bg = [
 	&host= "166"
 	&git_branch= "148"
 	&git_ahead= "52"
+	&git_behind= "52"
 	&git_staged= "22"
 	&git_dirty= "161"
 	&git_untracked= "52"
@@ -147,7 +150,14 @@ fn -git_branch_name {
 # Return how many commits this repo is ahead of master
 fn -git_ahead_count {
   out = []
-  err = ?(out = [(git cherry 2>/dev/null | grep "+ ")])
+  err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '>')])
+  count $out
+}
+
+# Return how many commits this repo is behind of master
+fn -git_behind_count {
+  out = []
+  err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '<')])
   count $out
 }
 
@@ -236,6 +246,13 @@ fn segment_git_ahead {
 	}
 }
 
+fn segment_git_behind {
+  changecount = (-git_behind_count)
+	if (> $changecount 0) {
+	  prompt_segment $segment_style_fg[git_behind] $segment_style_bg[git_behind] $changecount$glyph[git_behind]
+	}
+}
+
 fn segment_git_staged {
   changecount = (-git_staged_count)
 	if (> $changecount 0) {
@@ -275,6 +292,7 @@ segment = [
 	&host= $&segment_host
 	&git_branch= $&segment_git_branch
 	&git_ahead= $&segment_git_ahead
+	&git_behind= $&segment_git_behind
 	&git_staged= $&segment_git_staged
 	&git_dirty= $&segment_git_dirty
 	&git_untracked= $&segment_git_untracked
