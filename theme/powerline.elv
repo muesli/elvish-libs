@@ -65,7 +65,7 @@ segment_style_fg = [
 ]
 
 segment_style_bg = [
-	&arrow= "236"
+	&arrow= "22"
 	&su= "161"
 	&cache= "31"
 	&dir= "31"
