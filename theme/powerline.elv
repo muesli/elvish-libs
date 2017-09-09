@@ -101,9 +101,10 @@ auto_cache_threshold_ms = 100
 cached_prompt = [ ]
 cached_rprompt = [ ]
 
-last_bg = ""
-
 ######################################################################
+
+# last_bg is the background color of the last printed segment
+last_bg = ""
 
 # Convert output from -time function to a number in ms
 fn -time-to-ms [n]{
@@ -174,11 +175,22 @@ fn -git_untracked_count {
 # Return the current directory, shortened according to `$prompt_pwd_dir_length`
 fn -prompt_pwd {
 	tmp = (tilde-abbr $pwd)
-	if (== $prompt_pwd_dir_length 0) {
-		put $tmp
-	} else {
-		re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp
-	}
+
+  first = $true
+  tmps = [(splits / $tmp)]
+  for t $tmps {
+		if (not $first) {
+      put $glyph[dirchain]
+    }
+    put $t
+    first = $false
+  }
+
+	#if (== $prompt_pwd_dir_length 0) {
+	#	put $tmp
+	#} else {
+	#	re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp
+	#}
 }
 
 ######################################################################
