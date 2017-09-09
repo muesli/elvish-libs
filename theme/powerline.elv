@@ -78,7 +78,7 @@ segment_style_bg = [
 ]
 
 # To how many letters to abbreviate directories in the path - 0 to show in full
-prompt_pwd_dir_length = 0
+prompt_pwd_dir_length = 3
 
 # Format to use for the 'timestamp' segment, in strftime(3) format
 timestamp_format = "%H:%M:%S"
@@ -173,8 +173,11 @@ fn -git_untracked_count {
 }
 
 # Return the current directory, shortened according to `$prompt_pwd_dir_length`
-fn -prompt_pwd {
+fn prompt_pwd {
 	tmp = (tilde-abbr $pwd)
+	if (> $prompt_pwd_dir_length 0) {
+		#re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp
+	}
 
   first = $true
   tmps = [(splits / $tmp)]
@@ -185,12 +188,6 @@ fn -prompt_pwd {
     put $t
     first = $false
   }
-
-	#if (== $prompt_pwd_dir_length 0) {
-	#	put $tmp
-	#} else {
-	#	re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp
-	#}
 }
 
 ######################################################################
@@ -214,7 +211,7 @@ fn segment_cache {
 }
 
 fn segment_dir {
-  prompt_segment $segment_style_fg[dir] $segment_style_bg[dir] (-prompt_pwd)
+  prompt_segment $segment_style_fg[dir] $segment_style_bg[dir] (prompt_pwd)
 }
 
 fn segment_user {
