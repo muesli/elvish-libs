@@ -42,7 +42,7 @@ glyph = [
 	&git_dirty= "\u270E"
 	&git_untracked= "+"
 	&su= "⚡"
-  &cache= "∼"
+	&cache= "∼"
 	&chain= ""
 	&dirchain= ""
 ]
@@ -111,19 +111,19 @@ last_bg = ""
 
 # Convert output from -time function to a number in ms
 fn -time-to-ms [n]{
-  pat = (re:find '^([\d.]+)(.*)$' $n)
-  num unit = $pat[groups][1 2][text]
-  factor = [&s=1000 &ms=1 &µs=.001]
-  * $num $factor[$unit]
+	pat = (re:find '^([\d.]+)(.*)$' $n)
+	num unit = $pat[groups][1 2][text]
+	factor = [&s=1000 &ms=1 &µs=.001]
+	* $num $factor[$unit]
 }
 
 fn -log [@msg]{
-  echo (date) $@msg >> /tmp/chain-debug.log
+	echo (date) $@msg >> /tmp/chain-debug.log
 }
 
 fn -colorprint [what fg bg]{
-  edit:styled $what "38;5;"$fg";48;5;"$bg
-  last_bg = $bg
+	edit:styled $what "38;5;"$fg";48;5;"$bg
+	last_bg = $bg
 }
 
 # Build a prompt segment in the given style, surrounded by square brackets
@@ -134,52 +134,52 @@ fn prompt_segment [fg bg @texts]{
 
 # Return the git branch name of the current directory
 fn -git_branch_name {
-  out = ""
-  err = ?(out = (git branch 2>/dev/null | eawk [line @f]{
-        if (eq $f[0] "*") {
-          if (and (> (count $f) 2) (eq $f[2] "detached")) {
-            replaces ')' '' $f[4]
-          } else {
-            echo $f[1]
-          }
-        }
-  }))
-  put $out
+	out = ""
+	err = ?(out = (git branch 2>/dev/null | eawk [line @f]{
+				if (eq $f[0] "*") {
+					if (and (> (count $f) 2) (eq $f[2] "detached")) {
+						replaces ')' '' $f[4]
+					} else {
+						echo $f[1]
+					}
+				}
+	}))
+	put $out
 }
 
 # Return how many commits this repo is ahead of master
 fn -git_ahead_count {
-  out = []
-  err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '>')])
-  count $out
+	out = []
+	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '>')])
+	count $out
 }
 
 # Return how many commits this repo is behind of master
 fn -git_behind_count {
-  out = []
-  err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '<')])
-  count $out
+	out = []
+	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '<')])
+	count $out
 }
 
 # Return how many files in the current git repo are staged
 fn -git_staged_count {
-  out = []
-  err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
-  count $out
+	out = []
+	err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
+	count $out
 }
 
 # Return how many files in the current git repo are "dirty" (modified in any way)
 fn -git_dirty_count {
-  out = []
-  err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "M ")])
-  count $out
+	out = []
+	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "M ")])
+	count $out
 }
 
 # Return how many files in the current git repo are untracked
 fn -git_untracked_count {
-  out = []
-  err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "?? ")])
-  count $out
+	out = []
+	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "?? ")])
+	count $out
 }
 
 # Return the current directory, shortened according to `$prompt_pwd_dir_length`
@@ -189,32 +189,32 @@ fn prompt_pwd {
 		#re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp
 	}
 
-  first = $true
-  tmps = [(splits / $tmp)]
-  for t $tmps {
+	first = $true
+	tmps = [(splits / $tmp)]
+	for t $tmps {
 		if (not $first) {
-      put $glyph[dirchain]
-    }
-    put $t
-    first = $false
-  }
+			put $glyph[dirchain]
+		}
+		put $t
+		first = $false
+	}
 }
 
 ######################################################################
 # Built-in chain segments
 
 fn segment_newline {
-  put "\n"
+	put "\n"
 }
 
 fn segment_cache {
-  if $cache_chain {
-    prompt_segment $segment_style_fg[cache] $segment_style_bg[cache] $glyph[cache]
-  }
+	if $cache_chain {
+		prompt_segment $segment_style_fg[cache] $segment_style_bg[cache] $glyph[cache]
+	}
 }
 
 fn segment_dir {
-  prompt_segment $segment_style_fg[dir] $segment_style_bg[dir] (prompt_pwd)
+	prompt_segment $segment_style_fg[dir] $segment_style_bg[dir] (prompt_pwd)
 }
 
 fn segment_user {
@@ -226,44 +226,44 @@ fn segment_host {
 }
 
 fn segment_git_branch {
-  branch = (-git_branch_name)
-  if (not-eq $branch "") {
-	  prompt_segment $segment_style_fg[git_branch] $segment_style_bg[git_branch] $glyph[git_branch] $branch$glyph[suffix]
-  }
+	branch = (-git_branch_name)
+	if (not-eq $branch "") {
+		prompt_segment $segment_style_fg[git_branch] $segment_style_bg[git_branch] $glyph[git_branch] $branch$glyph[suffix]
+	}
 }
 
 fn segment_git_ahead {
-  changecount = (-git_ahead_count)
+	changecount = (-git_ahead_count)
 	if (> $changecount 0) {
-	  prompt_segment $segment_style_fg[git_ahead] $segment_style_bg[git_ahead] $changecount$glyph[git_ahead]
+		prompt_segment $segment_style_fg[git_ahead] $segment_style_bg[git_ahead] $changecount$glyph[git_ahead]
 	}
 }
 
 fn segment_git_behind {
-  changecount = (-git_behind_count)
+	changecount = (-git_behind_count)
 	if (> $changecount 0) {
-	  prompt_segment $segment_style_fg[git_behind] $segment_style_bg[git_behind] $changecount$glyph[git_behind]
+		prompt_segment $segment_style_fg[git_behind] $segment_style_bg[git_behind] $changecount$glyph[git_behind]
 	}
 }
 
 fn segment_git_staged {
-  changecount = (-git_staged_count)
+	changecount = (-git_staged_count)
 	if (> $changecount 0) {
-	  prompt_segment $segment_style_fg[git_staged] $segment_style_bg[git_staged] $changecount$glyph[git_staged]
+		prompt_segment $segment_style_fg[git_staged] $segment_style_bg[git_staged] $changecount$glyph[git_staged]
 	}
 }
 
 fn segment_git_dirty {
-  changecount = (-git_dirty_count)
+	changecount = (-git_dirty_count)
 	if (> $changecount 0) {
-	  prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $changecount$glyph[git_dirty]
+		prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $changecount$glyph[git_dirty]
 	}
 }
 
 fn segment_git_untracked {
-  changecount = (-git_untracked_count)
+	changecount = (-git_untracked_count)
 	if (> $changecount 0) {
-	  prompt_segment $segment_style_fg[git_untracked] $segment_style_bg[git_untracked] $changecount$glyph[git_untracked]
+		prompt_segment $segment_style_fg[git_untracked] $segment_style_bg[git_untracked] $changecount$glyph[git_untracked]
 	}
 }
 
@@ -322,28 +322,28 @@ fn -interpret-segment [seg]{
 # Return a string of values, including the appropriate chain connectors
 fn -build-chain [segments]{
 	first = $true
-  output = ""
+	output = ""
 	for seg $segments {
-    lbg = $last_bg
+		lbg = $last_bg
 		time = (-time { output = [(-interpret-segment $seg)] })
-    #    -log $pwd segment-$seg $time
-	  if (> (count $output) 0) {
-		  if (not $first) {
-        if (not (eq $seg "newline")) {
-          -colorprint $glyph[chain] $lbg $last_bg
-        } else {
-          -colorprint $glyph[chain] $lbg "0"
-        }
-		  }
-		  put $@output
-      if (not (eq $seg "newline")) {
-        first = $false
-      } else {
-        first = $true
-      }
-	  }
+		#    -log $pwd segment-$seg $time
+		if (> (count $output) 0) {
+			if (not $first) {
+				if (not (eq $seg "newline")) {
+					-colorprint $glyph[chain] $lbg $last_bg
+				} else {
+					-colorprint $glyph[chain] $lbg "0"
+				}
+			}
+			put $@output
+			if (not (eq $seg "newline")) {
+				first = $false
+			} else {
+				first = $true
+			}
+		}
 	}
-  -colorprint $glyph[chain]" " $last_bg "0"
+	-colorprint $glyph[chain]" " $last_bg "0"
 }
 
 # Check if the time exceeds the threshold for enabling/disabling
@@ -354,77 +354,77 @@ fn -build-chain [segments]{
 # functions are called only from the "cache_prompts" function, so that
 # caching is disabled only when both prompts are fast.
 fn -check_time_for_enabling_caching [t]{
-  ms = (-time-to-ms $t)
-  if (>= $ms $auto_cache_threshold_ms) {
-    if (not $cache_chain) {
-      -log Chain build took $ms - enabling prompt caching
-      theme:powerline:cache $true
-      edit:redraw
-    }
-  }
+	ms = (-time-to-ms $t)
+	if (>= $ms $auto_cache_threshold_ms) {
+		if (not $cache_chain) {
+			-log Chain build took $ms - enabling prompt caching
+			theme:powerline:cache $true
+			edit:redraw
+		}
+	}
 }
 
 fn -check_time_for_disabling_caching [t]{
-  ms = (-time-to-ms $t)
-  if (< $ms $auto_cache_threshold_ms) {
-    if $cache_chain {
-      -log Chain build took $ms - disabling prompt caching
-      theme:powerline:cache $false
-      edit:redraw
-    }
-  }
+	ms = (-time-to-ms $t)
+	if (< $ms $auto_cache_threshold_ms) {
+		if $cache_chain {
+			-log Chain build took $ms - disabling prompt caching
+			theme:powerline:cache $false
+			edit:redraw
+		}
+	}
 }
 
 # Prompt and rprompt functions
 
 fn prompt [@skipcheck]{
-  out = []
-  time = (-time { out = [(-build-chain $prompt_segments)] })
-  if (== (count $skipcheck) 0) {
-    -check_time_for_enabling_caching $time
-  }
-  put $@out
+	out = []
+	time = (-time { out = [(-build-chain $prompt_segments)] })
+	if (== (count $skipcheck) 0) {
+		-check_time_for_enabling_caching $time
+	}
+	put $@out
 }
 
 fn rprompt [@skipcheck]{
-  out = []
-  time = (-time { out = [(-build-chain $rprompt_segments)] } )
-  if (== (count $skipcheck) 0) {
-    -check_time_for_enabling_caching $time
-  }
-  put $@out
+	out = []
+	time = (-time { out = [(-build-chain $rprompt_segments)] } )
+	if (== (count $skipcheck) 0) {
+		-check_time_for_enabling_caching $time
+	}
+	put $@out
 }
 
 fn cache_prompts [@skipcheck]{
-  time = (-time {
-      cached_prompt = [(prompt $@skipcheck)]
-      cached_rprompt = [(rprompt $@skipcheck)]
-  })
-  if (== (count $skipcheck) 0) {
-    -check_time_for_disabling_caching $time
-  }
-  #  -log $pwd cache_prompts $time
+	time = (-time {
+			cached_prompt = [(prompt $@skipcheck)]
+			cached_rprompt = [(rprompt $@skipcheck)]
+	})
+	if (== (count $skipcheck) 0) {
+		-check_time_for_disabling_caching $time
+	}
+	#  -log $pwd cache_prompts $time
 }
 
 # Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
 fn setup {
-  if $cache_chain {
-    edit:before-readline=[ $@edit:before-readline $&cache_prompts ]
-    edit:prompt = { put $@cached_prompt }
-    edit:rprompt = { put $@cached_rprompt }
-    cache_prompts skip_timecheck
-  } else {
-    edit:prompt = $&prompt
-    edit:rprompt = $&rprompt
-  }
+	if $cache_chain {
+		edit:before-readline=[ $@edit:before-readline $&cache_prompts ]
+		edit:prompt = { put $@cached_prompt }
+		edit:rprompt = { put $@cached_rprompt }
+		cache_prompts skip_timecheck
+	} else {
+		edit:prompt = $&prompt
+		edit:rprompt = $&rprompt
+	}
 }
 
 # Toggle (or set, according to parameter) prompt caching
 fn cache [@val]{
-  value = (not $cache_chain)
-  if (> (count $val) 0) {
-    value = $val[0]
-  }
-  cache_chain = $value
-  setup
+	value = (not $cache_chain)
+	if (> (count $val) 0) {
+		value = $val[0]
+	}
+	cache_chain = $value
+	setup
 }
