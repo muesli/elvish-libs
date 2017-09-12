@@ -151,7 +151,7 @@ fn prompt_segment [fg bg @texts]{
 fn prompt_pwd {
 	tmp = (tilde-abbr $pwd)
 	if (> $prompt_pwd_dir_length 0) {
-		#re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp
+		tmp = (re:replace '(\.?[^/]{'$prompt_pwd_dir_length'})[^/]*/' '$1/' $tmp)
 	}
 
 	first = $true
