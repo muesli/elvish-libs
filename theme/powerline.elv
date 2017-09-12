@@ -133,7 +133,7 @@ fn -time-to-ms [n]{
 }
 
 fn -log [@msg]{
-	echo (date) $@msg >> /tmp/chain-debug.log
+	# echo (date) $@msg >> /tmp/chain-debug.log
 }
 
 fn -colorprint [what fg bg]{
