@@ -1,24 +1,24 @@
-# Muesli's chain prompt theme, based on the fish theme at https://github.com/oh-my-fish/theme-chain
+# Muesli's prompt theme, based on the fish theme at https://github.com/oh-my-fish/theme-chain
 # Ported to Elvish by Diego Zamboni <diego@zzamboni.org>
 # Personal style changes by Christian Muehlhaeuser <muesli@gmail.com>
 #
-# To use, put this file in ~/.elvish/lib/ and add the following to your ~/.elvish/rc.elv file:
-#   use chain
-#   chain:setup
+# To use, put this file in ~/.elvish/lib/theme and add the following to your ~/.elvish/rc.elv file:
+#   use theme:muesli
+#   theme:muesli:setup
 #
-# You can also assign the prompt functions manually instead of calling `chain:setup`:
-#   edit:prompt = $chain:&prompt
-#   edit:rprompt = $chain:&rprompt
+# You can also assign the prompt functions manually instead of calling `theme:muesli:setup`:
+#   edit:prompt = $theme:muesli:&prompt
+#   edit:rprompt = $theme:muesli:&rprompt
 #
-# The chains on both sides can be configured by assigning to `theme:chain:prompt_segments` and
-# `theme:chain:rprompt_segments`, respectively. These variables must be arrays, and the given
-# segments will be automatically linked by `$theme:chain:glyph[chain]`. Each element can be any
+# The chains on both sides can be configured by assigning to `theme:muesli:prompt_segments` and
+# `theme:muesli:rprompt_segments`, respectively. These variables must be arrays, and the given
+# segments will be automatically linked by `$theme:muesli:glyph[chain]`. Each element can be any
 # of the following:
 #
 # - The name of one of the built-in segments. Available segments: `prefix` `userhost` `arrow` `timestamp` `su` `dir` `git_branch` `git_dirty`
 # - A string or the output of `edit:styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
-# - The output of a call to `theme:chain:segment <style> <strings>`, which returns a "proper" segment, enclosed in
+# - The output of a call to `theme:muesli:segment <style> <strings>`, which returns a "proper" segment, enclosed in
 #   square brackets and styled as requested.
 #
 

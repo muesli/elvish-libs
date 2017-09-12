@@ -6,9 +6,9 @@
 #   use theme:powerline
 #   theme:powerline:setup
 #
-# You can also assign the prompt functions manually instead of calling `powerline:setup`:
-#   edit:prompt = $powerline:&prompt
-#   edit:rprompt = $powerline:&rprompt
+# You can also assign the prompt functions manually instead of calling `theme:powerline:setup`:
+#   edit:prompt = $theme:powerline:&prompt
+#   edit:rprompt = $theme:powerline:&rprompt
 #
 # The chains on both sides can be configured by assigning to `theme:powerline:prompt_segments` and
 # `theme:powerline:rprompt_segments`, respectively. These variables must be arrays, and the given
