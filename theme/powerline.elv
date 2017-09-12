@@ -1,5 +1,6 @@
 # Powerline prompt theme
-# Ported to Elvish by Christian Muehlhaeuser <muesli@gmail.com>
+#     Copyright (c) 2017, Christian Muehlhaeuser <muesli@gmail.com>
+#
 # Based on chain.elv by Diego Zamboni <diego@zzamboni.org>
 #
 # To use, put this file in ~/.elvish/lib/theme and add the following to your ~/.elvish/rc.elv file:
@@ -291,7 +292,7 @@ fn -build-chain [segments]{
 	for seg $segments {
 		lbg = $last_bg
 		time = (-time { output = [(-interpret-segment $seg)] })
-		#    -log $pwd segment-$seg $time
+		# -log $pwd segment-$seg $time
 		if (> (count $output) 0) {
 			if (not $first) {
 				if (not (eq $seg "newline")) {
@@ -368,7 +369,7 @@ fn cache_prompts [@skipcheck]{
 	if (== (count $skipcheck) 0) {
 		-check_time_for_disabling_caching $time
 	}
-	#  -log $pwd cache_prompts $time
+	# -log $pwd cache_prompts $time
 }
 
 # Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
