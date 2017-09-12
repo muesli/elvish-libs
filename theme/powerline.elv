@@ -31,7 +31,6 @@ use git
 
 # Configurable prompt segments for each prompt
 prompt_segments = [
-	user
 	host
 	dir
 	git_branch
@@ -42,6 +41,7 @@ prompt_segments = [
 	git_untracked
 	newline
 	timestamp
+	user
 	arrow
 ]
 rprompt_segments = [
