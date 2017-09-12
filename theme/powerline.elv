@@ -44,7 +44,9 @@ prompt_segments = [
 	timestamp
 	arrow
 ]
-rprompt_segments = [ ]
+rprompt_segments = [
+	cache
+]
 
 # Glyphs to be used in the prompt
 glyph = [
@@ -58,7 +60,7 @@ glyph = [
 	&git_dirty= "\u270E"
 	&git_untracked= "+"
 	&su= "⚡"
-	&cache= "∼"
+	&cache= "cached"
 	&chain= ""
 	&dirchain= ""
 ]
