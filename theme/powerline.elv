@@ -22,7 +22,7 @@
 # - A string or the output of `edit:styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
 # - The output of a call to `theme:powerline:segment <style> <strings>`, which returns a "proper"
-#   segment, enclosed in square brackets and styled as requested.
+#   segment, enclosed in prefix and suffix and styled as requested.
 #
 
 use git
