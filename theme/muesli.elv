@@ -22,6 +22,8 @@
 #   square brackets and styled as requested.
 #
 
+use git
+
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
@@ -103,28 +105,6 @@ fn prompt_segment [style @texts]{
 	-colored $text $style
 }
 
-# Return the git branch name of the current directory
-fn -git_branch_name {
-  out = ""
-  err = ?(out = (git branch 2>/dev/null | eawk [line @f]{
-        if (eq $f[0] "*") {
-          if (and (> (count $f) 2) (eq $f[2] "detached")) {
-            replaces ')' '' $f[4]
-          } else {
-            echo $f[1]
-          }
-        }
-  }))
-  put $out
-}
-
-# Return whether the current git repo is "dirty" (modified in any way)
-fn -git_is_dirty {
-  out = []
-  err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null)])
-  > (count $out) 0
-}
-
 # Return the current directory, shortened according to `$prompt_pwd_dir_length`
 fn -prompt_pwd {
 	tmp = (tilde-abbr $pwd)
@@ -164,14 +144,14 @@ fn segment_userhost {
 }
 
 fn segment_git_branch {
-  branch = (-git_branch_name)
+  branch = (git:branch_name)
   if (not-eq $branch "") {
 	  prompt_segment $segment_style[git_branch] $glyph[git_branch] $branch
   }
 }
 
 fn segment_git_dirty {
-	if (-git_is_dirty) {
+	if (git:is_dirty) {
 	  prompt_segment $segment_style[git_dirty] $glyph[git_dirty]
 	}
 }

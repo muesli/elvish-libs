@@ -24,6 +24,8 @@
 #   segment, enclosed in square brackets and styled as requested.
 #
 
+use git
+
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
@@ -145,56 +147,6 @@ fn prompt_segment [fg bg @texts]{
 	-colorprint $text $fg $bg
 }
 
-# Return the git branch name of the current directory
-fn -git_branch_name {
-	out = ""
-	err = ?(out = (git branch 2>/dev/null | eawk [line @f]{
-				if (eq $f[0] "*") {
-					if (and (> (count $f) 2) (eq $f[2] "detached")) {
-						replaces ')' '' $f[4]
-					} else {
-						echo $f[1]
-					}
-				}
-	}))
-	put $out
-}
-
-# Return how many commits this repo is ahead of master
-fn -git_ahead_count {
-	out = []
-	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '>')])
-	count $out
-}
-
-# Return how many commits this repo is behind of master
-fn -git_behind_count {
-	out = []
-	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '<')])
-	count $out
-}
-
-# Return how many files in the current git repo are staged
-fn -git_staged_count {
-	out = []
-	err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
-	count $out
-}
-
-# Return how many files in the current git repo are "dirty" (modified in any way)
-fn -git_dirty_count {
-	out = []
-	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "M ")])
-	count $out
-}
-
-# Return how many files in the current git repo are untracked
-fn -git_untracked_count {
-	out = []
-	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "?? ")])
-	count $out
-}
-
 # Return the current directory, shortened according to `$prompt_pwd_dir_length`
 fn prompt_pwd {
 	tmp = (tilde-abbr $pwd)
@@ -239,42 +191,42 @@ fn segment_host {
 }
 
 fn segment_git_branch {
-	branch = (-git_branch_name)
+	branch = (git:branch_name)
 	if (not-eq $branch "") {
 		prompt_segment $segment_style_fg[git_branch] $segment_style_bg[git_branch] $glyph[git_branch] $branch$glyph[suffix]
 	}
 }
 
 fn segment_git_ahead {
-	changecount = (-git_ahead_count)
+	changecount = (git:ahead_count)
 	if (> $changecount 0) {
 		prompt_segment $segment_style_fg[git_ahead] $segment_style_bg[git_ahead] $changecount$glyph[git_ahead]
 	}
 }
 
 fn segment_git_behind {
-	changecount = (-git_behind_count)
+	changecount = (git:behind_count)
 	if (> $changecount 0) {
 		prompt_segment $segment_style_fg[git_behind] $segment_style_bg[git_behind] $changecount$glyph[git_behind]
 	}
 }
 
 fn segment_git_staged {
-	changecount = (-git_staged_count)
+	changecount = (git:staged_count)
 	if (> $changecount 0) {
 		prompt_segment $segment_style_fg[git_staged] $segment_style_bg[git_staged] $changecount$glyph[git_staged]
 	}
 }
 
 fn segment_git_dirty {
-	changecount = (-git_dirty_count)
+	changecount = (git:dirty_count)
 	if (> $changecount 0) {
 		prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $changecount$glyph[git_dirty]
 	}
 }
 
 fn segment_git_untracked {
-	changecount = (-git_untracked_count)
+	changecount = (git:untracked_count)
 	if (> $changecount 0) {
 		prompt_segment $segment_style_fg[git_untracked] $segment_style_bg[git_untracked] $changecount$glyph[git_untracked]
 	}
