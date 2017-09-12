@@ -1,3 +1,13 @@
+#
+# Git methods for elvish
+#     Copyright (c) 2017, Christian Muehlhaeuser <muesli@gmail.com>
+#                         Diego Zamboni <diego@zzamboni.org>
+#
+#   For license see LICENSE
+#
+# To use, put this file in ~/.elvish/lib and add the following line to import it somewhere:
+#   use git
+
 # Return the git branch name of the current directory
 fn branch_name {
 	out = ""
