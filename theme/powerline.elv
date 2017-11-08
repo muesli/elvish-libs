@@ -26,6 +26,7 @@
 #
 
 use git
+use re
 
 # Default values (all can be configured by assigning to the appropriate variable):
 
