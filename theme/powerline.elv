@@ -45,9 +45,7 @@ prompt_segments = [
 	user
 	arrow
 ]
-rprompt_segments = [
-	cache
-]
+rprompt_segments = [ ]
 
 # Glyphs to be used in the prompt
 glyph = [
@@ -61,7 +59,6 @@ glyph = [
 	&git_dirty= "\u270E"
 	&git_untracked= "+"
 	&su= "⚡"
-	&cache= "cached"
 	&chain= ""
 	&dirchain= ""
 ]
@@ -70,7 +67,6 @@ glyph = [
 segment_style_fg = [
 	&arrow= "15"
 	&su= "15"
-	&cache= "15"
 	&dir= "15"
 	&user= "250"
 	&host= "254"
@@ -86,7 +82,6 @@ segment_style_fg = [
 segment_style_bg = [
 	&arrow= "22"
 	&su= "161"
-	&cache= "31"
 	&dir= "31"
 	&user= "240"
 	&host= "166"
@@ -107,21 +102,6 @@ timestamp_format = "%H:%M:%S"
 
 # User ID that will trigger the "su" segment. Defaults to root.
 root_id = 0
-
-# If $true, the chain is only generated after each command and not on every keystroke
-# This improves typing speed sometimes (e.g. in large git repos when you have the
-# git segments enabled) but may cause prompt refresh problems sometimes until
-# you press Enter after a directory change or some other change.
-cache_chain = $false
-
-# Threshold in milliseconds for auto-enabling prompt caching
-auto_cache_threshold_ms = 100
-
-# Cached generated prompt - since arbitrary commands can be executed, we compute
-# the prompt only before displaying it and not on every keystroke, and we cache
-# the prompts here.
-cached_prompt = [ ]
-cached_rprompt = [ ]
 
 # Internal variable to avoid adding the before-readline hook multiple times
 -hook-installed = $false
@@ -177,12 +157,6 @@ fn prompt_pwd {
 
 fn segment_newline {
 	put "\n"
-}
-
-fn segment_cache {
-	if $cache_chain {
-		prompt_segment $segment_style_fg[cache] $segment_style_bg[cache] $glyph[cache]
-	}
 }
 
 fn segment_dir {
@@ -254,19 +228,18 @@ fn segment_timestamp {
 
 # List of built-in segments
 segment = [
-	&newline= $&segment_newline
-	&cache= $&segment_cache
-	&dir= $&segment_dir
-	&user= $&segment_user
-	&host= $&segment_host
-	&git_branch= $&segment_git_branch
-	&git_ahead= $&segment_git_ahead
-	&git_behind= $&segment_git_behind
-	&git_staged= $&segment_git_staged
-	&git_dirty= $&segment_git_dirty
-	&git_untracked= $&segment_git_untracked
-	&arrow= $&segment_arrow
-	&timestamp= $&segment_timestamp
+	&newline= $segment_newline~
+	&dir= $segment_dir~
+	&user= $segment_user~
+	&host= $segment_host~
+	&git_branch= $segment_git_branch~
+	&git_ahead= $segment_git_ahead~
+	&git_behind= $segment_git_behind~
+	&git_staged= $segment_git_staged~
+	&git_dirty= $segment_git_dirty~
+	&git_untracked= $segment_git_untracked~
+	&arrow= $segment_arrow~
+	&timestamp= $segment_timestamp~
 ]
 
 # Given a segment specification, return the appropriate value, depending
@@ -318,88 +291,18 @@ fn -build-chain [segments]{
 	-colorprint $glyph[chain]" " $last_bg "0"
 }
 
-# Check if the time exceeds the threshold for enabling/disabling
-# caching We have separate functions for enabling/disabling because
-# they are called from different points - the "enabling" functions are
-# called after each chain generation (so that either prompt or rprompt
-# taking too long can trigger the caching), while the "disabling"
-# functions are called only from the "cache_prompts" function, so that
-# caching is disabled only when both prompts are fast.
-fn -check_time_for_enabling_caching [t]{
-	ms = (-time-to-ms $t)
-	if (>= $ms $auto_cache_threshold_ms) {
-		if (not $cache_chain) {
-			-log Chain build took $ms - enabling prompt caching
-			theme:powerline:cache $true
-			edit:redraw
-		}
-	}
-}
-
-fn -check_time_for_disabling_caching [t]{
-	ms = (-time-to-ms $t)
-	if (< $ms $auto_cache_threshold_ms) {
-		if $cache_chain {
-			-log Chain build took $ms - disabling prompt caching
-			theme:powerline:cache $false
-			edit:redraw
-		}
-	}
-}
-
 # Prompt and rprompt functions
 
 fn prompt [@skipcheck]{
-	out = []
-	time = (-time { out = [(-build-chain $prompt_segments)] })
-	if (== (count $skipcheck) 0) {
-		-check_time_for_enabling_caching $time
-	}
-	put $@out
+  put (-build-chain $prompt_segments)
 }
 
 fn rprompt [@skipcheck]{
-	out = []
-	time = (-time { out = [(-build-chain $rprompt_segments)] } )
-	if (== (count $skipcheck) 0) {
-		-check_time_for_enabling_caching $time
-	}
-	put $@out
-}
-
-fn cache_prompts [@skipcheck]{
-	time = (-time {
-			cached_prompt = [(prompt $@skipcheck)]
-			cached_rprompt = [(rprompt $@skipcheck)]
-	})
-	if (== (count $skipcheck) 0) {
-		-check_time_for_disabling_caching $time
-	}
-	# -log $pwd cache_prompts $time
+  put (-build-chain $rprompt_segments)
 }
 
 # Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
 fn setup {
-	if $cache_chain {
-		if (not $-hook-installed) {
-			edit:before-readline=[ $@edit:before-readline $&cache_prompts ]
-			-hook-installed = $true
-		}
-		edit:prompt = { put $@cached_prompt }
-		edit:rprompt = { put $@cached_rprompt }
-		cache_prompts skip_timecheck
-	} else {
-		edit:prompt = $&prompt
-		edit:rprompt = $&rprompt
-	}
-}
-
-# Toggle (or set, according to parameter) prompt caching
-fn cache [@val]{
-	value = (not $cache_chain)
-	if (> (count $val) 0) {
-		value = $val[0]
-	}
-	cache_chain = $value
-	setup
+	edit:prompt = $prompt~
+	edit:rprompt = $rprompt~
 }
