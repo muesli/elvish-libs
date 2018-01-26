@@ -111,6 +111,17 @@ root_id = 0
 # last_bg is the background color of the last printed segment
 last_bg = ""
 
+# git stats
+last_git_ahead = 0
+last_git_behind = 0
+last_git_dirty = 0
+last_git_untracked = 0
+
+fn -parse_git {
+	last_git_ahead last_git_behind = (git:rev_count)
+	last_git_dirty last_git_untracked = (git:change_count)
+}
+
 # Convert output from -time function to a number in ms
 fn -time-to-ms [n]{
 	pat = (re:find '^([\d.]+)(.*)$' $n)
@@ -179,16 +190,14 @@ fn segment_git_branch {
 }
 
 fn segment_git_ahead {
-	changecount = (git:ahead_count)
-	if (> $changecount 0) {
-		prompt_segment $segment_style_fg[git_ahead] $segment_style_bg[git_ahead] $changecount$glyph[git_ahead]
+	if (> $last_git_ahead 0) {
+		prompt_segment $segment_style_fg[git_ahead] $segment_style_bg[git_ahead] $last_git_ahead$glyph[git_ahead]
 	}
 }
 
 fn segment_git_behind {
-	changecount = (git:behind_count)
-	if (> $changecount 0) {
-		prompt_segment $segment_style_fg[git_behind] $segment_style_bg[git_behind] $changecount$glyph[git_behind]
+	if (> $last_git_behind 0) {
+		prompt_segment $segment_style_fg[git_behind] $segment_style_bg[git_behind] $last_git_behind$glyph[git_behind]
 	}
 }
 
@@ -200,16 +209,14 @@ fn segment_git_staged {
 }
 
 fn segment_git_dirty {
-	changecount = (git:dirty_count)
-	if (> $changecount 0) {
-		prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $changecount$glyph[git_dirty]
+	if (> $last_git_dirty 0) {
+		prompt_segment $segment_style_fg[git_dirty] $segment_style_bg[git_dirty] $last_git_dirty$glyph[git_dirty]
 	}
 }
 
 fn segment_git_untracked {
-	changecount = (git:untracked_count)
-	if (> $changecount 0) {
-		prompt_segment $segment_style_fg[git_untracked] $segment_style_bg[git_untracked] $changecount$glyph[git_untracked]
+	if (> $last_git_untracked 0) {
+		prompt_segment $segment_style_fg[git_untracked] $segment_style_bg[git_untracked] $last_git_untracked$glyph[git_untracked]
 	}
 }
 
@@ -268,6 +275,8 @@ fn -interpret-segment [seg]{
 fn -build-chain [segments]{
 	first = $true
 	output = ""
+	-parse_git
+
 	for seg $segments {
 		lbg = $last_bg
 		time = (-time { output = [(-interpret-segment $seg)] })
