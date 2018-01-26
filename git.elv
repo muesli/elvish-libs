@@ -1,7 +1,7 @@
 #
 # Git methods for elvish
-#     Copyright (c) 2017, Christian Muehlhaeuser <muesli@gmail.com>
-#                         Diego Zamboni <diego@zzamboni.org>
+#     Copyright (c) 2017-2018, Christian Muehlhaeuser <muesli@gmail.com>
+#                              Diego Zamboni <diego@zzamboni.org>
 #
 #   For license see LICENSE
 #
@@ -23,37 +23,49 @@ fn branch_name {
 	put $out
 }
 
-# Return how many commits this repo is ahead of master
-fn ahead_count {
+# Return how many commits this repo is ahead & behind of master
+fn rev_count {
 	out = []
-	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '>')])
-	count $out
+	ahead = 0
+	behind = 0
+
+	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null)])
+	each [line]{
+		if (has-prefix $line ">") {
+			ahead = (+ $ahead 1)
+		}
+		if (has-prefix $line "<") {
+			behind = (+ $behind 1)
+		}
+	} $out
+
+	put $ahead
+	put $behind
 }
 
-# Return how many commits this repo is behind of master
-fn behind_count {
+# Return how many files in the current git repo are "dirty" (modified in any way) or untracked
+fn change_count {
 	out = []
-	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null | grep '<')])
-	count $out
+	dirty = 0
+	untracked = 0
+
+	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null)])
+	each [line]{
+		if (has-prefix $line " M ") {
+			dirty = (+ $dirty 1)
+		}
+		if (has-prefix $line "?? ") {
+			untracked = (+ $untracked 1)
+		}
+	} $out
+
+	put $dirty
+	put $untracked
 }
 
 # Return how many files in the current git repo are staged
 fn staged_count {
 	out = []
 	err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
-	count $out
-}
-
-# Return how many files in the current git repo are "dirty" (modified in any way)
-fn dirty_count {
-	out = []
-	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "M ")])
-	count $out
-}
-
-# Return how many files in the current git repo are untracked
-fn untracked_count {
-	out = []
-	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null | grep "?? ")])
 	count $out
 }
