@@ -13,6 +13,8 @@
 #     edit:insert:binding[Alt-i] = $dir:&dir-chooser
 #     fn cd [@dir]{ dir:cd $@dir }
 
+use builtin
+
 # Hooks to run before and after the directory chooser
 before-chooser = []
 after-chooser = []
@@ -89,6 +91,9 @@ fn -cd [@dir]{
 
 # Wrapper entrypoint for -cd
 fn cd [@dir]{ -cd $@dir }
+
+# cd to the base directory of the argument
+fn cdb [p]{ cd (dirname $p) }
 
 # Move back and forward through the stack.
 fn back {
