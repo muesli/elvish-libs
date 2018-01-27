@@ -1,5 +1,5 @@
 # elvish-libs
-Libs & Themes for (elvish)[https://github.com/elves/elvish]
+Libs & Themes for [elvish](https://github.com/elves/elvish)
 
 ## Install
 
