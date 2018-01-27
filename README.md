@@ -15,6 +15,8 @@ epm:install github.com/muesli/elvish-libs
 
 ### powerline
 
+![powerline](screenshots/powerline.png)
+
 To use the `powerline` theme, put this code in your `~/.elvish/rc.elv`:
 
 ```
