@@ -104,9 +104,6 @@ timestamp_format = "%H:%M:%S"
 # User ID that will trigger the "su" segment. Defaults to root.
 root_id = 0
 
-# Internal variable to avoid adding the before-readline hook multiple times
--hook-installed = $false
-
 ######################################################################
 
 # last_bg is the background color of the last printed segment
@@ -121,14 +118,6 @@ last_git_untracked = 0
 fn -parse_git {
 	last_git_ahead last_git_behind = (git:rev_count)
 	last_git_dirty last_git_untracked = (git:change_count)
-}
-
-# Convert output from -time function to a number in ms
-fn -time-to-ms [n]{
-	pat = (re:find '^([\d.]+)(.*)$' $n)
-	num unit = $pat[groups][1 2][text]
-	factor = [&s=1000 &ms=1 &µs=.001]
-	* $num $factor[$unit]
 }
 
 fn -log [@msg]{
