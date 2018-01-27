@@ -1,19 +1,24 @@
+#
 # Powerline prompt theme
-#     Copyright (c) 2017, Christian Muehlhaeuser <muesli@gmail.com>
+#     Copyright (c) 2017-2018, Christian Muehlhaeuser <muesli@gmail.com>
 #
 # Based on chain.elv by Diego Zamboni <diego@zzamboni.org>
 #
-# To use, put this file in ~/.elvish/lib/theme and add the following to your ~/.elvish/rc.elv file:
-#   use theme:powerline
-#   theme:powerline:setup
+# To use this theme, first install it via epm:
+#   use epm
+#   epm:install github.com/muesli/elvish-libs
 #
-# You can also assign the prompt functions manually instead of calling `theme:powerline:setup`:
-#   edit:prompt = $theme:powerline:&prompt
-#   edit:rprompt = $theme:powerline:&rprompt
+# Then add the following lines to your ~/.elvish/rc.elv file:
+#   use github.com/muesli/elvish-libs/theme/powerline
+#   powerline:setup
 #
-# The chains on both sides can be configured by assigning to `theme:powerline:prompt_segments` and
-# `theme:powerline:rprompt_segments`, respectively. These variables must be arrays, and the given
-# segments will be automatically linked by `$theme:powerline:glyph[chain]`. Each element can be any
+# You can also assign the prompt functions manually instead of calling `powerline:setup`:
+#   edit:prompt = $powerline:&prompt
+#   edit:rprompt = $powerline:&rprompt
+#
+# The chains on both sides can be configured by assigning to `powerline:prompt_segments` and
+# `powerline:rprompt_segments`, respectively. These variables must be arrays, and the given
+# segments will be automatically linked by `$powerline:glyph[chain]`. Each element can be any
 # of the following:
 #
 # - The name of one of the built-in segments. Available segments:
@@ -21,7 +26,7 @@
 #     `git_branch` `git_ahead` `git_behind` `git_staged` `git_dirty` `git_untracked`
 # - A string or the output of `edit:styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
-# - The output of a call to `theme:powerline:segment <style> <strings>`, which returns a "proper"
+# - The output of a call to `powerline:segment <style> <strings>`, which returns a "proper"
 #   segment, enclosed in prefix and suffix and styled as requested.
 #
 
