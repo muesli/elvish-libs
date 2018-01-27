@@ -25,8 +25,9 @@
 #   segment, enclosed in prefix and suffix and styled as requested.
 #
 
-use git
 use re
+
+use github.com/muesli/elvish-libs/git
 
 # Default values (all can be configured by assigning to the appropriate variable):
 
