@@ -5,8 +5,13 @@
 #
 #   For license see LICENSE
 #
-# To use, put this file in ~/.elvish/lib and add the following line to import it somewhere:
-#   use git
+# To use this module, first install it via epm:
+#   use epm
+#   epm:install github.com/muesli/elvish-libs
+#
+# Then add the following line to import it somewhere:
+#   use github.com/muesli/elvish-libs/git
+#
 
 # Return the git branch name of the current directory
 fn branch_name {
