@@ -40,6 +40,7 @@ use github.com/muesli/elvish-libs/git
 prompt_segments = [
 	host
 	dir
+	virtualenv
 	git_branch
 	git_ahead
 	git_behind
@@ -67,6 +68,7 @@ glyph = [
 	&su= "⚡"
 	&chain= ""
 	&dirchain= ""
+	&virtualenv= "🐍"
 ]
 
 # Styling for each built-in segment. The value must be a valid argument to `edit:styled`
@@ -83,6 +85,7 @@ segment_style_fg = [
 	&git_dirty= "15"
 	&git_untracked= "15"
 	&timestamp= "250"
+	&virtualenv= "226"
 ]
 
 segment_style_bg = [
@@ -98,6 +101,7 @@ segment_style_bg = [
 	&git_dirty= "161"
 	&git_untracked= "52"
 	&timestamp= "238"
+	&virtualenv= "12"
 ]
 
 # To how many letters to abbreviate directories in the path - 0 to show in full
@@ -228,6 +232,12 @@ fn segment_timestamp {
 	prompt_segment $segment_style_fg[timestamp] $segment_style_bg[timestamp] (date +$timestamp_format)
 }
 
+fn segment_virtualenv {
+	if (not-eq $E:VIRTUAL_ENV "") {
+		prompt_segment $segment_style_fg[user] $segment_style_bg[user] $glyph[virtualenv](re:replace '\/.*\/' ''  $E:VIRTUAL_ENV)
+	}
+}
+
 # List of built-in segments
 segment = [
 	&newline= $segment_newline~
@@ -242,6 +252,7 @@ segment = [
 	&git_untracked= $segment_git_untracked~
 	&arrow= $segment_arrow~
 	&timestamp= $segment_timestamp~
+	&virtualenv= $segment_virtualenv~
 ]
 
 # Given a segment specification, return the appropriate value, depending
