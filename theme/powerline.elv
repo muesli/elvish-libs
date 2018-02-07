@@ -68,7 +68,7 @@ glyph = [
 	&su= "⚡"
 	&chain= ""
 	&dirchain= ""
-	&virtualenv= ""
+	&virtualenv= " "
 ]
 
 # Styling for each built-in segment. The value must be a valid argument to `edit:styled`
