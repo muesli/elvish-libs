@@ -13,6 +13,8 @@
 #   use github.com/muesli/elvish-libs/git
 #
 
+use re
+
 # Return the git branch name of the current directory
 fn branch_name {
 	out = ""
@@ -73,4 +75,17 @@ fn staged_count {
 	out = []
 	err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
 	count $out
+}
+
+# Automatically "git rm" files which have been deleted from the file
+# system. Can be used to clean up when you remove files by hand before
+# telling git about it. Use with care.
+fn auto-rm {
+  git status | each [l]{
+    f = [(re:split &max=3 '\s+' $l)]
+    if (re:match '^\s*deleted:' $l) {
+      echo (edit:styled "Removing "$f[2] red)
+      git rm $f[2]
+    }
+  }
 }
