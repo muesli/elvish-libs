@@ -123,10 +123,11 @@ last_git_ahead = 0
 last_git_behind = 0
 last_git_dirty = 0
 last_git_untracked = 0
+last_git_deleted = 0
 
 fn -parse_git {
 	last_git_ahead last_git_behind = (git:rev_count)
-	last_git_dirty last_git_untracked = (git:change_count)
+	last_git_dirty last_git_untracked last_git_deleted = (git:change_count)
 }
 
 fn -log [@msg]{
