@@ -55,6 +55,7 @@ fn change_count {
 	out = []
 	dirty = 0
 	untracked = 0
+	deleted = 0
 
 	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null)])
 	each [line]{
@@ -64,10 +65,14 @@ fn change_count {
 		if (has-prefix $line "?? ") {
 			untracked = (+ $untracked 1)
 		}
+		if (has-prefix $line " D ") {
+			deleted = (+ $deleted 1)
+		}
 	} $out
 
 	put $dirty
 	put $untracked
+	put $deleted
 }
 
 # Return how many files in the current git repo are staged
