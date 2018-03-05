@@ -309,11 +309,11 @@ fn -build-chain [segments]{
 
 # Prompt and rprompt functions
 
-fn prompt [@skipcheck]{
+fn prompt {
   put (-build-chain $prompt_segments)
 }
 
-fn rprompt [@skipcheck]{
+fn rprompt {
   put (-build-chain $rprompt_segments)
 }
 
