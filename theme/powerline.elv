@@ -119,15 +119,10 @@ root-id = 0
 last-bg = ""
 
 # git stats
-last-git-ahead = 0
-last-git-behind = 0
-last-git-dirty = 0
-last-git-untracked = 0
-last-git-deleted = 0
+last-git-status = [&]
 
 fn -parse-git {
-	last-git-ahead last-git-behind = (git:rev_count)
-	last-git-dirty last-git-untracked last-git-deleted = (git:change_count)
+	last-git-status = (git:status &counts=$true)
 }
 
 fn -log [@msg]{
@@ -183,40 +178,43 @@ fn segment-host {
 }
 
 fn segment-git-branch {
-	branch = (git:branch_name)
+	branch = $last-git-status[branch-name]
 	if (not-eq $branch "") {
+		if (eq $branch '(detached)') {
+			branch = $last-git-status[branch-oid][0:7]
+		}
 		prompt-segment $segment-style-fg[git-branch] $segment-style-bg[git-branch] $glyph[git-branch] $branch$glyph[suffix]
 	}
 }
 
 fn segment-git-ahead {
-	if (> $last-git-ahead 0) {
-		prompt-segment $segment-style-fg[git-ahead] $segment-style-bg[git-ahead] $last-git-ahead$glyph[git-ahead]
+	if (> $last-git-status[rev-ahead] 0) {
+		prompt-segment $segment-style-fg[git-ahead] $segment-style-bg[git-ahead] $last-git-status[rev-ahead]$glyph[git-ahead]
 	}
 }
 
 fn segment-git-behind {
-	if (> $last-git-behind 0) {
-		prompt-segment $segment-style-fg[git-behind] $segment-style-bg[git-behind] $last-git-behind$glyph[git-behind]
+	if (> $last-git-status[rev-behind] 0) {
+		prompt-segment $segment-style-fg[git-behind] $segment-style-bg[git-behind] $last-git-status[rev-behind]$glyph[git-behind]
 	}
 }
 
 fn segment-git-staged {
-	changecount = (git:staged_count)
-	if (> $changecount 0) {
-		prompt-segment $segment-style-fg[git-staged] $segment-style-bg[git-staged] $changecount$glyph[git-staged]
+	total-staged = (+ $last-git-status[staged-modified-count staged-deleted-count staged-added-count renamed-count copied-count])
+	if (> $total-staged 0) {
+		prompt-segment $segment-style-fg[git-staged] $segment-style-bg[git-staged] $total-staged$glyph[git-staged]
 	}
 }
 
 fn segment-git-dirty {
-	if (> $last-git-dirty 0) {
-		prompt-segment $segment-style-fg[git-dirty] $segment-style-bg[git-dirty] $last-git-dirty$glyph[git-dirty]
+	if (> $last-git-status[local-modified-count] 0) {
+		prompt-segment $segment-style-fg[git-dirty] $segment-style-bg[git-dirty] $last-git-status[local-modified-count]$glyph[git-dirty]
 	}
 }
 
 fn segment-git-untracked {
-	if (> $last-git-untracked 0) {
-		prompt-segment $segment-style-fg[git-untracked] $segment-style-bg[git-untracked] $last-git-untracked$glyph[git-untracked]
+	if (> $last-git-status[untracked-count] 0) {
+		prompt-segment $segment-style-fg[git-untracked] $segment-style-bg[git-untracked] $last-git-status[untracked-count]$glyph[git-untracked]
 	}
 }
 
