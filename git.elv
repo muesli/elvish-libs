@@ -41,7 +41,7 @@ fn status {
   rev-behind      = 0
   is-git-repo     = $false
 
-  is-ok = ?(git status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null | eawk [line @f]{
+  is-ok = ?(git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null | eawk [line @f]{
       #    pprint "@f=" $f
       -switch $f[0] [
         &"#"= {
