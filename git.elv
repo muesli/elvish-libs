@@ -121,13 +121,13 @@ fn branch_name {
 # Return how many commits this repo is ahead & behind of master
 fn rev_count {
   data = (status)
-	put $data[rev-ahead] $data[rev-behind]
+  put $data[rev-ahead] $data[rev-behind]
 }
 
 # Return how many files in the current git repo are "dirty" (modified in any way) or untracked
 fn change_count {
   data = (status)
-	put (count $data[local-modified]) (count $data[untracked]) (count $data[local-deleted])
+  put (count $data[local-modified]) (count $data[untracked]) (count $data[local-deleted])
 }
 
 # Return how many files in the current git repo are staged
