@@ -15,6 +15,11 @@
 
 use re
 
+# You can configure the status command here - only change if you know
+# what you are doing. The command must produce output in Porcelain v2
+# format. See https://git-scm.com/docs/git-status for details
+git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null }
+
 # Switch statement to make the code in `status` simpler
 fn -switch [a b]{
   if (has-key $b $a) {
@@ -22,9 +27,11 @@ fn -switch [a b]{
   }
 }
 
-# Runs git status --porcelain=v2 --branch, parses it and returns a
-# data structure with information.
-fn status {
+# Runs $git-status-cmd, parses it and returns a data structure with
+# information. If &counts=$true, it precomputes the element count for
+# all key elements, and adds them in the result with the same names
+# but with "-count" at the end.
+fn status [&counts=$false]{
   staged-modified = []
   staged-deleted  = []
   staged-added    = []
@@ -41,7 +48,7 @@ fn status {
   rev-behind      = 0
   is-git-repo     = $false
 
-  is-ok = ?(git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null | eawk [line @f]{
+  is-ok = ?($git-status-cmd | eawk [line @f]{
       #    pprint "@f=" $f
       -switch $f[0] [
         &"#"= {
@@ -96,9 +103,11 @@ fn status {
     &rev-behind=      $rev-behind
     &is-git-repo=     (bool $is-ok)
   ]
-  keys $result | each [k]{
-    if (eq (kind-of $result[$k]) list) {
-      result[$k'-count'] = (count $result[$k])
+  if $counts {
+    keys $result | each [k]{
+      if (eq (kind-of $result[$k]) list) {
+        result[$k'-count'] = (count $result[$k])
+      }
     }
   }
   put $result
