@@ -15,82 +15,133 @@
 
 use re
 
+# You can configure the status command here - only change if you know
+# what you are doing. The command must produce output in Porcelain v2
+# format. See https://git-scm.com/docs/git-status for details
+git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null }
+
+# Switch statement to make the code in `status` simpler
+fn -switch [a b]{
+  if (has-key $b $a) {
+    $b[$a]
+  }
+}
+
+# Runs $git-status-cmd, parses it and returns a data structure with
+# information. If &counts=$true, it precomputes the element count for
+# all key elements, and adds them in the result with the same names
+# but with "-count" at the end.
+fn status [&counts=$false]{
+  staged-modified = []
+  staged-deleted  = []
+  staged-added    = []
+  local-modified  = []
+  local-deleted   = []
+  untracked       = []
+  unmerged        = []
+  ignored         = []
+  renamed         = []
+  copied          = []
+  branch-name     = ""
+  branch-oid      = ""
+  rev-ahead       = 0
+  rev-behind      = 0
+  is-git-repo     = $false
+
+  is-ok = ?($git-status-cmd | eawk [line @f]{
+      #    pprint "@f=" $f
+      -switch $f[0] [
+        &"#"= {
+          -switch $f[1] [
+            &"branch.head"= { branch-name = $f[2] }
+            &"branch.oid"= { branch-oid = $f[2] }
+            &"branch.ab"= {
+              rev-ahead = (re:find '\+(\d+)' $f[2])[groups][1][text]
+              rev-behind = (re:find '-(\d+)' $f[3])[groups][1][text]
+            }
+          ]
+        }
+        &"1"= {
+          -switch $f[1] [
+            &"M."= { staged-modified = [ $@staged-modified $f[8] ] }
+            &".M"= { local-modified =  [ $@local-modified  $f[8] ] }
+            &"MM"= { staged-modified = [ $@staged-modified $f[8] ]; local-modified = [ $@local-modified $f[8] ] }
+            &"D."= { staged-deleted =  [ $@staged-deleted  $f[8] ] }
+            &".D"= { local-deleted =   [ $@local-deleted   $f[8] ] }
+            &"DD"= { staged-deleted =  [ $@staged-deleted  $f[8] ]; local-deleted = [ $@local-deleted $f[8] ] }
+            &"A."= { staged-added =    [ $@staged-added    $f[8] ] }
+          ]
+        }
+        &"2"= {
+          if (re:match '(\.C|C\.)' $f[1]) {
+            copied = [ $@copied $f[9] ]
+          } elif (re:match '(\.R|R\.)' $f[1]) {
+            renamed = [ $@renamed $f[9] ]
+          }
+        }
+        &"?"= { untracked = [ $@untracked $f[1] ] }
+        &"!"= { ignored = [ $@ignored $f[1] ] }
+        &"u"= { unmerged = [ $@unmerged $f[10] ] }
+      ]
+    }
+  )
+
+  result = [
+    &staged-modified= $staged-modified
+    &staged-deleted=  $staged-deleted
+    &staged-added=    $staged-added
+    &local-modified=  $local-modified
+    &local-deleted=   $local-deleted
+    &untracked=       $untracked
+    &unmerged=        $unmerged
+    &ignored=         $ignored
+    &renamed=         $renamed
+    &copied=          $copied
+    &branch-name=     $branch-name
+    &branch-oid=      $branch-oid
+    &rev-ahead=       $rev-ahead
+    &rev-behind=      $rev-behind
+    &is-git-repo=     (bool $is-ok)
+  ]
+  if $counts {
+    keys $result | each [k]{
+      if (eq (kind-of $result[$k]) list) {
+        result[$k'-count'] = (count $result[$k])
+      }
+    }
+  }
+  put $result
+}
+
 # Return the git branch name of the current directory
 fn branch_name {
-	out = ""
-	err = ?(out = (git branch 2>/dev/null | eawk [line @f]{
-				if (eq $f[0] "*") {
-					if (and (> (count $f) 2) (eq $f[2] "detached")) {
-						replaces ')' '' $f[4]
-					} else {
-						echo $f[1]
-					}
-				}
-	}))
-	put $out
+  put (status)[branch-name]
 }
 
 # Return how many commits this repo is ahead & behind of master
 fn rev_count {
-	out = []
-	ahead = 0
-	behind = 0
-
-	err = ?(out = [(git rev-list --left-right '@{upstream}...HEAD' 2>/dev/null)])
-	each [line]{
-		if (has-prefix $line ">") {
-			ahead = (+ $ahead 1)
-		}
-		if (has-prefix $line "<") {
-			behind = (+ $behind 1)
-		}
-	} $out
-
-	put $ahead
-	put $behind
+  data = (status)
+  put $data[rev-ahead] $data[rev-behind]
 }
 
 # Return how many files in the current git repo are "dirty" (modified in any way) or untracked
 fn change_count {
-	out = []
-	dirty = 0
-	untracked = 0
-	deleted = 0
-
-	err = ?(out = [(git status -s --ignore-submodules=dirty 2>/dev/null)])
-	each [line]{
-		if (has-prefix $line " M ") {
-			dirty = (+ $dirty 1)
-		}
-		if (has-prefix $line "?? ") {
-			untracked = (+ $untracked 1)
-		}
-		if (has-prefix $line " D ") {
-			deleted = (+ $deleted 1)
-		}
-	} $out
-
-	put $dirty
-	put $untracked
-	put $deleted
+  data = (status)
+  put (count $data[local-modified]) (count $data[untracked]) (count $data[local-deleted])
 }
 
 # Return how many files in the current git repo are staged
 fn staged_count {
-	out = []
-	err = ?(out = [(git diff --cached --numstat 2>/dev/null)])
-	count $out
+  data = (status)
+  + (count $data[staged-modified]) (count $data[staged-deleted]) (count $data[staged-added]) (count $data[renamed]) (count $data[copied])
 }
 
 # Automatically "git rm" files which have been deleted from the file
 # system. Can be used to clean up when you remove files by hand before
 # telling git about it. Use with care.
 fn auto-rm {
-  git status | each [l]{
-    f = [(re:split &max=3 '\s+' $l)]
-    if (re:match '^\s*deleted:' $l) {
-      echo (edit:styled "Removing "$f[2] red)
-      git rm $f[2]
-    }
+  explode (status)[local-deleted] | each [f]{
+    echo (edit:styled "Removing "$f red)
+    git rm $f
   }
 }
