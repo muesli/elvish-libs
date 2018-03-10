@@ -115,17 +115,10 @@ root-id = 0
 
 ######################################################################
 
-fn -make-builder {
+fn -prompt-builder {
 
 # last-bg is the background color of the last printed segment
 last-bg = 0
-
-# git stats
-last-git-status = [&]
-
-fn -parse-git {
-	last-git-status = (git:status &counts=$true)
-}
 
 fn -log [@msg]{
 	# echo (date) $@msg >> /tmp/chain-debug.log
@@ -149,6 +142,14 @@ fn prompt-pwd {
 		dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
 	}
 	splits / $dir | joins ' '$glyph[dirchain]' '
+}
+
+######################################################################
+# cached git status
+last-git-status = [&]
+
+fn -parse-git {
+	last-git-status = (git:status &counts=$true)
 }
 
 ######################################################################
@@ -301,10 +302,10 @@ fn -build-chain [segments]{
 put $-build-chain~
 }
 
--build-prompt~ = (-make-builder)
--build-rprompt~ = (-make-builder)
+-build-prompt~ = (-prompt-builder)
+-build-rprompt~ = (-prompt-builder)
 
-# Prompt and rprompt functions
+# Prompt and rprompt functions (careful, they will be executed concurrently)
 
 fn prompt {
 	-build-prompt $prompt-segments
