@@ -271,6 +271,10 @@ fn -prompt-builder {
 
 	# Return a string of values, including the appropriate chain connectors
 	fn -build-chain [segments]{
+		if (== (count $segments) 0) {
+			return
+		}
+
 		first = $true
 		output = ""
 		-parse-git
