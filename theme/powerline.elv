@@ -115,8 +115,10 @@ root-id = 0
 
 ######################################################################
 
+fn -make-builder {
+
 # last-bg is the background color of the last printed segment
-last-bg = ""
+last-bg = 0
 
 # git stats
 last-git-status = [&]
@@ -296,14 +298,20 @@ fn -build-chain [segments]{
 	-colorprint $glyph[chain]" " $last-bg "0"
 }
 
+put $-build-chain~
+}
+
+-build-prompt~ = (-make-builder)
+-build-rprompt~ = (-make-builder)
+
 # Prompt and rprompt functions
 
 fn prompt {
-	-build-chain $prompt-segments
+	-build-prompt $prompt-segments
 }
 
 fn rprompt {
-	-build-chain $rprompt-segments
+	-build-rprompt $rprompt-segments
 }
 
 # Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
