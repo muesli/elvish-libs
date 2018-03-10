@@ -118,7 +118,7 @@ root-id = 0
 fn -make-builder {
 
 # last-bg is the background color of the last printed segment
-last-bg = ""
+last-bg = 0
 
 # git stats
 last-git-status = [&]
