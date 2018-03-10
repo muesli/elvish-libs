@@ -121,7 +121,7 @@ fn -prompt-builder {
 last-bg = 0
 
 fn -log [@msg]{
-	# echo (date) $@msg >> /tmp/chain-debug.log
+	echo (date) $@msg >> /tmp/chain-debug.log
 }
 
 fn -colorprint [what fg bg]{

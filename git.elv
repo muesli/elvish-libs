@@ -49,7 +49,7 @@ fn status [&counts=$false]{
   is-git-repo     = $false
 
   is-ok = ?($git-status-cmd | eawk [line @f]{
-      #    pprint "@f=" $f
+      # pprint "@f=" $f
       -switch $f[0] [
         &"#"= {
           -switch $f[1] [
