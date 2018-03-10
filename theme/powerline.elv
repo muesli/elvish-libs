@@ -142,20 +142,11 @@ fn prompt-segment [fg bg @texts]{
 
 # Return the current directory, shortened according to `$prompt-pwd-dir-length`
 fn prompt-pwd {
-	tmp = (tilde-abbr $pwd)
+	dir = (tilde-abbr $pwd)
 	if (> $prompt-pwd-dir-length 0) {
-		tmp = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $tmp)
+		dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
 	}
-
-	first = $true
-	tmps = [(splits / $tmp)]
-	for t $tmps {
-		if (not $first) {
-			put $glyph[dirchain]
-		}
-		put $t
-		first = $false
-	}
+	splits / $dir | joins ' '$glyph[dirchain]' '
 }
 
 ######################################################################
@@ -308,11 +299,11 @@ fn -build-chain [segments]{
 # Prompt and rprompt functions
 
 fn prompt {
-  put (-build-chain $prompt-segments)
+	-build-chain $prompt-segments
 }
 
 fn rprompt {
-  put (-build-chain $rprompt-segments)
+	-build-chain $rprompt-segments
 }
 
 # Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
