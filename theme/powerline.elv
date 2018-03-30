@@ -50,6 +50,7 @@ prompt-segments = [
 	newline
 	timestamp
 	user
+	session
 	arrow
 ]
 rprompt-segments = [ ]
@@ -68,6 +69,7 @@ glyph = [
 	&su= "⚡"
 	&chain= ""
 	&dirchain= ""
+	&session= "●"
 	&virtualenv= "🐍"
 ]
 
@@ -104,6 +106,9 @@ segment-style-bg = [
 	&virtualenv= "12"
 ]
 
+session-fg-color = 0
+session-bg-color = (+ (% $pid 216) 16)
+
 # To how many letters to abbreviate directories in the path - 0 to show in full
 prompt-pwd-dir-length = 3
 
@@ -125,6 +130,14 @@ fn prompt-pwd {
 		dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
 	}
 	splits / $dir | joins ' '$glyph[dirchain]' '
+}
+
+fn session-color-picker {
+  if (>= (% (- $session-bg-color 16) 36) 18) {
+    session-fg-color = 232
+  } else {
+    session-fg-color = 255
+  }
 }
 
 ######################################################################
@@ -224,6 +237,10 @@ fn -prompt-builder {
 		prompt-segment $segment-style-fg[timestamp] $segment-style-bg[timestamp] (date +$timestamp-format)
 	}
 
+	fn segment-session {
+		prompt-segment $session-fg-color $session-bg-color $glyph[session]
+	}
+
 	fn segment-virtualenv {
 		if (not-eq $E:VIRTUAL_ENV "") {
 			prompt-segment $segment-style-fg[user] $segment-style-bg[user] $glyph[virtualenv](re:replace '\/.*\/' ''  $E:VIRTUAL_ENV)
@@ -242,6 +259,7 @@ fn -prompt-builder {
 		&git-staged= $segment-git-staged~
 		&git-dirty= $segment-git-dirty~
 		&git-untracked= $segment-git-untracked~
+		&session= $segment-session~
 		&arrow= $segment-arrow~
 		&timestamp= $segment-timestamp~
 		&virtualenv= $segment-virtualenv~
@@ -319,6 +337,7 @@ fn rprompt {
 
 # Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
 fn setup {
+	session-color-picker
 	edit:prompt = $prompt~
 	edit:rprompt = $rprompt~
 }
