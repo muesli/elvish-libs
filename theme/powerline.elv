@@ -335,9 +335,11 @@ fn rprompt {
 	-build-rprompt $rprompt-segments
 }
 
-# Default setup, assigning our functions to `edit:prompt` and `edit:rprompt`
-fn setup {
+# Default init, assigning our functions to `edit:prompt` and `edit:rprompt`
+fn init {
 	session-color-picker
 	edit:prompt = $prompt~
 	edit:rprompt = $rprompt~
 }
+
+init
