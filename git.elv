@@ -15,10 +15,15 @@
 
 use re
 
-# You can configure the status command here - only change if you know
-# what you are doing. The command must produce output in Porcelain v2
-# format. See https://git-scm.com/docs/git-status for details
+# You can configure the commands to use here - only change if you know
+# what you are doing.
+
+# The status command must produce output in Porcelain v2 format. See
+# https://git-scm.com/docs/git-status for details
 git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null }
+
+# Get remotes
+git-remote-cmd = { git remote 2>/dev/null }
 
 # Switch statement to make the code in `status` simpler
 fn -switch [a b]{
@@ -144,4 +149,30 @@ fn auto-rm {
     echo (edit:styled "Removing "$f red)
     git rm $f
   }
+}
+
+fn remotes {
+  _ = ?($git-remote-cmd)
+}
+
+fn remotes-transform [transform-fn @remotes]{
+  if (eq $remotes []) {
+    remotes = [(remotes)]
+  }
+  each [r]{
+    url = (git remote get-url $r)
+    new-url = ($transform-fn $url)
+    if (not-eq $url $new-url) {
+      git remote set-url $r $new-url
+      echo (edit:styled "Moved remote "$r" from "$url" to "$new-url green)
+    }
+  } $remotes
+}
+
+fn remotes-ssh-to-https [@remotes]{
+  remotes-transform [url]{ re:replace 'git(?:@|://)(.*)[:/](.*)/(.*)' 'https://$1/$2/$3' $url } $@remotes
+}
+
+fn remotes-https-to-ssh [@remotes]{
+  remotes-transform [url]{ re:replace 'https://(.*)/(.*)/(.*)' 'git@$1:$2/$3' $url } $@remotes
 }
