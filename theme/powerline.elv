@@ -24,7 +24,7 @@
 # - The name of one of the built-in segments. Available segments:
 #     `newline` `user` `host` `arrow` `timestamp` `dir`
 #     `git-branch` `git-ahead` `git-behind` `git-staged` `git-dirty` `git-untracked`
-# - A string or the output of `edit:styled`, which will be displayed as-is.
+# - A string or the output of `styled`, which will be displayed as-is.
 # - A lambda, which will be called and its output displayed
 # - The output of a call to `powerline:segment <style> <strings>`, which returns a "proper"
 #   segment, enclosed in prefix and suffix and styled as requested.
@@ -71,7 +71,7 @@ glyph = [
 	&virtualenv= "🐍"
 ]
 
-# Styling for each built-in segment. The value must be a valid argument to `edit:styled`
+# Styling for each built-in segment. The value must be a valid argument to `styled`
 segment-style-fg = [
 	&arrow= "0"
 	&su= "15"
@@ -141,7 +141,8 @@ fn -prompt-builder {
 	last-bg = 0
 
 	fn -colorprint [what fg bg]{
-		edit:styled $what "38;5;"$fg";48;5;"$bg
+		fn st [seg]{ styled-segment $seg &fg-color="color"$fg &bg-color="color"$bg }
+		styled $what $st~
 		last-bg = $bg
 	}
 
@@ -257,7 +258,7 @@ fn -prompt-builder {
 
 	# Given a segment specification, return the appropriate value, depending
 	# on whether it's the name of a built-in segment, a lambda, a string
-	# or an edit:styled
+	# or an styled
 	fn -interpret-segment [seg]{
 		k = (kind-of $seg)
 		if (eq $k fn) {
@@ -272,7 +273,7 @@ fn -prompt-builder {
 				put $seg
 			}
 		} elif (eq $k styled) {
-			# If it's an edit:styled, return it as-is
+			# If it's an styled, return it as-is
 			put $seg
 		}
 	}
