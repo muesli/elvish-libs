@@ -20,10 +20,10 @@ use re
 
 # The status command must produce output in Porcelain v2 format. See
 # https://git-scm.com/docs/git-status for details
-git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>/dev/null }
+git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>&- }
 
 # Get remotes
-git-remote-cmd = { git remote 2>/dev/null }
+git-remote-cmd = { git remote 2>&- }
 
 # Switch statement to make the code in `status` simpler
 fn -switch [a b]{
