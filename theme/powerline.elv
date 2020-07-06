@@ -31,6 +31,7 @@
 #
 
 use re
+use str
 
 use github.com/muesli/elvish-libs/git
 
@@ -124,7 +125,7 @@ fn prompt-pwd {
 	if (> $prompt-pwd-dir-length 0) {
 		dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
 	}
-	splits / $dir | joins ' '$glyph[dirchain]' '
+	str:split / $dir | joins ' '$glyph[dirchain]' '
 }
 
 fn session-color-picker {
@@ -290,8 +291,8 @@ fn -prompt-builder {
 
 		for seg $segments {
 			lbg = $last-bg
-			time = (-time { output = [(-interpret-segment $seg)] })
-			# -log $pwd segment-$seg $time
+			measured-time = (time { output = [(-interpret-segment $seg)] })
+			# -log $pwd segment-$seg $measured-time
 			if (> (count $output) 0) {
 				if (not $first) {
 					if (not (eq $seg "newline")) {

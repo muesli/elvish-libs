@@ -145,7 +145,7 @@ fn staged_count {
 # system. Can be used to clean up when you remove files by hand before
 # telling git about it. Use with care.
 fn auto-rm {
-  explode (status)[local-deleted] | each [f]{
+  all (status)[local-deleted] | each [f]{
     echo (edit:styled "Removing "$f red)
     git rm $f
   }
