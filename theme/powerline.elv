@@ -79,6 +79,7 @@ segment-style-fg = [
 	&dir= "15"
 	&user= "250"
 	&host= "254"
+	&host-short= "254"
 	&git-branch= "0"
 	&git-ahead= "15"
 	&git-behind= "15"
@@ -95,6 +96,7 @@ segment-style-bg = [
 	&dir= "31"
 	&user= "240"
 	&host= "166"
+	&host-short= "166"
 	&git-branch= "148"
 	&git-ahead= "52"
 	&git-behind= "52"
@@ -180,6 +182,10 @@ fn -prompt-builder {
 		prompt-segment $segment-style-fg[host] $segment-style-bg[host] (hostname)
 	}
 
+	fn segment-host-short {
+		prompt-segment $segment-style-fg[host-short] $segment-style-bg[host-short] (hostname --short)
+	}
+
 	fn segment-git-branch {
 		branch = $last-git-status[branch-name]
 		if (not-eq $branch "") {
@@ -246,6 +252,7 @@ fn -prompt-builder {
 		&dir= $segment-dir~
 		&user= $segment-user~
 		&host= $segment-host~
+		&host-short= $segment-host-short~
 		&git-branch= $segment-git-branch~
 		&git-ahead= $segment-git-ahead~
 		&git-behind= $segment-git-behind~
