@@ -127,7 +127,7 @@ fn prompt-pwd {
 	if (> $prompt-pwd-dir-length 0) {
 		dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
 	}
-	str:split / $dir | joins ' '$glyph[dirchain]' '
+	str:split / $dir | str:join ' '$glyph[dirchain]' '
 }
 
 fn session-color-picker {
@@ -151,7 +151,7 @@ fn -prompt-builder {
 
 	# Build a prompt segment in the given style, surrounded by square brackets
 	fn prompt-segment [fg bg @texts]{
-		text = $glyph[prefix](joins ' ' $texts)$glyph[suffix]
+		text = $glyph[prefix](str:join ' ' $texts)$glyph[suffix]
 		-colorprint $text $fg $bg
 	}
 

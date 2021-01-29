@@ -23,6 +23,7 @@
 #
 
 use git
+use str
 
 # Default values (all can be configured by assigning to the appropriate variable):
 
@@ -101,7 +102,7 @@ fn -colored [what color]{
 
 # Build a prompt segment in the given style, surrounded by square brackets
 fn prompt_segment [style @texts]{
-	text = "["(joins ' ' $texts)"]"
+	text = "["(str:join ' ' $texts)"]"
 	-colored $text $style
 }
 
