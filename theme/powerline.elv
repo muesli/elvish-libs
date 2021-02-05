@@ -190,7 +190,7 @@ fn -prompt-builder {
 		branch = $last-git-status[branch-name]
 		if (not-eq $branch "") {
 			if (eq $branch '(detached)') {
-				branch = $last-git-status[branch-oid][0:7]
+				branch = $last-git-status[branch-oid][0..7]
 			}
 			prompt-segment $segment-style-fg[git-branch] $segment-style-bg[git-branch] $glyph[git-branch] $branch$glyph[suffix]
 		}
