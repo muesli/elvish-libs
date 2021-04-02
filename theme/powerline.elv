@@ -141,10 +141,16 @@ fn session-color-picker {
 ######################################################################
 fn -prompt-builder {
 	# last-bg is the background color of the last printed segment
-	last-bg = 0
+	last-bg = $segment-style-bg[default]
 
 	fn -colorprint [what fg bg]{
-		fn st [seg]{ styled-segment $seg &fg-color="color"$fg &bg-color="color"$bg }
+		fn st [seg]{
+			if (eq $bg "transparent") {
+				styled-segment $seg &fg-color="color"$fg
+			} else {
+				styled-segment $seg &fg-color="color"$fg &bg-color="color"$bg
+			}
+		}
 		styled $what $st~
 		last-bg = $bg
 	}
