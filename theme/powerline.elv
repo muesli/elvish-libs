@@ -91,6 +91,7 @@ segment-style-fg = [
 ]
 
 segment-style-bg = [
+	&default= "0"
 	&arrow= (+ (% $pid 216) 16)
 	&su= "161"
 	&dir= "31"
@@ -311,7 +312,7 @@ fn -prompt-builder {
 					if (not (eq $seg "newline")) {
 						-colorprint $glyph[chain] $lbg $last-bg
 					} else {
-						-colorprint $glyph[chain] $lbg "0"
+						-colorprint $glyph[chain] $lbg $segment-style-bg[default]
 					}
 				}
 				put $@output
@@ -322,7 +323,7 @@ fn -prompt-builder {
 				}
 			}
 		}
-		-colorprint $glyph[chain]" " $last-bg "0"
+		-colorprint $glyph[chain]" " $last-bg $segment-style-bg[default]
 	}
 
 	put $-build-chain~
