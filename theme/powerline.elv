@@ -91,7 +91,7 @@ segment-style-fg = [
 ]
 
 segment-style-bg = [
-	&default= "0"
+	&default= "transparent"
 	&arrow= (+ (% $pid 216) 16)
 	&su= "161"
 	&dir= "31"
