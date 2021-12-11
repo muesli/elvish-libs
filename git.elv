@@ -20,13 +20,13 @@ use re
 
 # The status command must produce output in Porcelain v2 format. See
 # https://git-scm.com/docs/git-status for details
-git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>&- }
+var git-status-cmd = { git --no-optional-locks status --porcelain=v2 --branch --ignore-submodules=all 2>&- }
 
 # Get remotes
-git-remote-cmd = { git remote 2>&- }
+var git-remote-cmd = { git remote 2>&- }
 
 # Switch statement to make the code in `status` simpler
-fn -switch [a b]{
+fn -switch {|a b|
   if (has-key $b $a) {
     $b[$a]
   }
@@ -36,62 +36,62 @@ fn -switch [a b]{
 # information. If &counts=$true, it precomputes the element count for
 # all key elements, and adds them in the result with the same names
 # but with "-count" at the end.
-fn status [&counts=$false]{
-  staged-modified = []
-  staged-deleted  = []
-  staged-added    = []
-  local-modified  = []
-  local-deleted   = []
-  untracked       = []
-  unmerged        = []
-  ignored         = []
-  renamed         = []
-  copied          = []
-  branch-name     = ""
-  branch-oid      = ""
-  rev-ahead       = 0
-  rev-behind      = 0
-  is-git-repo     = $false
+fn status {|&counts=$false|
+  var staged-modified = []
+  var staged-deleted  = []
+  var staged-added    = []
+  var local-modified  = []
+  var local-deleted   = []
+  var untracked       = []
+  var unmerged        = []
+  var ignored         = []
+  var renamed         = []
+  var copied          = []
+  var branch-name     = ""
+  var branch-oid      = ""
+  var rev-ahead       = 0
+  var rev-behind      = 0
+  var is-git-repo     = $false
 
-  is-ok = ?($git-status-cmd | eawk [line @f]{
+  var is-ok = ?($git-status-cmd | eawk {|line @f|
       # pprint "@f=" $f
       -switch $f[0] [
         &"#"= {
           -switch $f[1] [
-            &"branch.head"= { branch-name = $f[2] }
-            &"branch.oid"= { branch-oid = $f[2] }
+            &"branch.head"= { set branch-name = $f[2] }
+            &"branch.oid"= { set branch-oid = $f[2] }
             &"branch.ab"= {
-              rev-ahead = (re:find '\+(\d+)' $f[2])[groups][1][text]
-              rev-behind = (re:find '-(\d+)' $f[3])[groups][1][text]
+              set rev-ahead = (re:find '\+(\d+)' $f[2])[groups][1][text]
+              set rev-behind = (re:find '-(\d+)' $f[3])[groups][1][text]
             }
           ]
         }
         &"1"= {
           -switch $f[1] [
-            &"M."= { staged-modified = [ $@staged-modified $f[8] ] }
-            &".M"= { local-modified =  [ $@local-modified  $f[8] ] }
-            &"MM"= { staged-modified = [ $@staged-modified $f[8] ]; local-modified = [ $@local-modified $f[8] ] }
-            &"D."= { staged-deleted =  [ $@staged-deleted  $f[8] ] }
-            &".D"= { local-deleted =   [ $@local-deleted   $f[8] ] }
-            &"DD"= { staged-deleted =  [ $@staged-deleted  $f[8] ]; local-deleted = [ $@local-deleted $f[8] ] }
-            &"A."= { staged-added =    [ $@staged-added    $f[8] ] }
+            &"M."= { set staged-modified = [ $@staged-modified $f[8] ] }
+            &".M"= { set local-modified =  [ $@local-modified  $f[8] ] }
+            &"MM"= { set staged-modified = [ $@staged-modified $f[8] ]; set local-modified = [ $@local-modified $f[8] ] }
+            &"D."= { set staged-deleted =  [ $@staged-deleted  $f[8] ] }
+            &".D"= { set local-deleted =   [ $@local-deleted   $f[8] ] }
+            &"DD"= { set staged-deleted =  [ $@staged-deleted  $f[8] ]; set local-deleted = [ $@local-deleted $f[8] ] }
+            &"A."= { set staged-added =    [ $@staged-added    $f[8] ] }
           ]
         }
         &"2"= {
           if (re:match '(\.C|C\.)' $f[1]) {
-            copied = [ $@copied $f[9] ]
+            set copied = [ $@copied $f[9] ]
           } elif (re:match '(\.R|R\.)' $f[1]) {
-            renamed = [ $@renamed $f[9] ]
+            set renamed = [ $@renamed $f[9] ]
           }
         }
-        &"?"= { untracked = [ $@untracked $f[1] ] }
-        &"!"= { ignored = [ $@ignored $f[1] ] }
-        &"u"= { unmerged = [ $@unmerged $f[10] ] }
+        &"?"= { set untracked = [ $@untracked $f[1] ] }
+        &"!"= { set ignored = [ $@ignored $f[1] ] }
+        &"u"= { set unmerged = [ $@unmerged $f[10] ] }
       ]
     }
   )
 
-  result = [
+  var result = [
     &staged-modified= $staged-modified
     &staged-deleted=  $staged-deleted
     &staged-added=    $staged-added
@@ -109,9 +109,9 @@ fn status [&counts=$false]{
     &is-git-repo=     (bool $is-ok)
   ]
   if $counts {
-    keys $result | each [k]{
+    keys $result | each {|k|
       if (eq (kind-of $result[$k]) list) {
-        result[$k'-count'] = (count $result[$k])
+        set result[$k'-count'] = (count $result[$k])
       }
     }
   }
@@ -125,19 +125,19 @@ fn branch_name {
 
 # Return how many commits this repo is ahead & behind of master
 fn rev_count {
-  data = (status)
+  var data = (status)
   put $data[rev-ahead] $data[rev-behind]
 }
 
 # Return how many files in the current git repo are "dirty" (modified in any way) or untracked
 fn change_count {
-  data = (status)
+  var data = (status)
   put (count $data[local-modified]) (count $data[untracked]) (count $data[local-deleted])
 }
 
 # Return how many files in the current git repo are staged
 fn staged_count {
-  data = (status)
+  var data = (status)
   + (count $data[staged-modified]) (count $data[staged-deleted]) (count $data[staged-added]) (count $data[renamed]) (count $data[copied])
 }
 
@@ -145,23 +145,23 @@ fn staged_count {
 # system. Can be used to clean up when you remove files by hand before
 # telling git about it. Use with care.
 fn auto-rm {
-  all (status)[local-deleted] | each [f]{
+  all (status)[local-deleted] | each {|f|
     echo (edit:styled "Removing "$f red)
     git rm $f
   }
 }
 
 fn remotes {
-  _ = ?($git-remote-cmd)
+  set _ = ?($git-remote-cmd)
 }
 
-fn remotes-transform [transform-fn @remotes]{
+fn remotes-transform {|transform-fn @remotes|
   if (eq $remotes []) {
-    remotes = [(remotes)]
+    set remotes = [(remotes)]
   }
-  each [r]{
-    url = (git remote get-url $r)
-    new-url = ($transform-fn $url)
+  each {|r|
+    var url = (git remote get-url $r)
+    var new-url = ($transform-fn $url)
     if (not-eq $url $new-url) {
       git remote set-url $r $new-url
       echo (edit:styled "Moved remote "$r" from "$url" to "$new-url green)
@@ -169,10 +169,10 @@ fn remotes-transform [transform-fn @remotes]{
   } $remotes
 }
 
-fn remotes-ssh-to-https [@remotes]{
-  remotes-transform [url]{ re:replace 'git(?:@|://)(.*)[:/](.*)/(.*)' 'https://$1/$2/$3' $url } $@remotes
+fn remotes-ssh-to-https {|@remotes|
+  remotes-transform {|url| re:replace 'git(?:@|://)(.*)[:/](.*)/(.*)' 'https://$1/$2/$3' $url } $@remotes
 }
 
-fn remotes-https-to-ssh [@remotes]{
-  remotes-transform [url]{ re:replace 'https://(.*)/(.*)/(.*)' 'git@$1:$2/$3' $url } $@remotes
+fn remotes-https-to-ssh {|@remotes|
+  remotes-transform {|url| re:replace 'https://(.*)/(.*)/(.*)' 'git@$1:$2/$3' $url } $@remotes
 }
