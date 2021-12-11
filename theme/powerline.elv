@@ -38,7 +38,7 @@ use github.com/muesli/elvish-libs/git
 # Default values (all can be configured by assigning to the appropriate variable):
 
 # Configurable prompt segments for each prompt
-prompt-segments = [
+var prompt-segments = [
 	host
 	dir
 	virtualenv
@@ -53,10 +53,10 @@ prompt-segments = [
 	user
 	arrow
 ]
-rprompt-segments = [ ]
+var rprompt-segments = [ ]
 
 # Glyphs to be used in the prompt
-glyph = [
+var glyph = [
 	&prefix= " "
 	&suffix= " "
 	&arrow= ""
@@ -73,7 +73,7 @@ glyph = [
 ]
 
 # Styling for each built-in segment. The value must be a valid argument to `styled`
-segment-style-fg = [
+var segment-style-fg = [
 	&arrow= "0"
 	&su= "15"
 	&dir= "15"
@@ -90,7 +90,7 @@ segment-style-fg = [
 	&virtualenv= "226"
 ]
 
-segment-style-bg = [
+var segment-style-bg = [
 	&default= "transparent"
 	&arrow= (+ (% $pid 216) 16)
 	&su= "161"
@@ -109,43 +109,43 @@ segment-style-bg = [
 ]
 
 # To how many letters to abbreviate directories in the path - 0 to show in full
-prompt-pwd-dir-length = 3
+var prompt-pwd-dir-length = 3
 
 # Format to use for the 'timestamp' segment, in strftime(3) format
-timestamp-format = "%H:%M:%S"
+var timestamp-format = "%H:%M:%S"
 
 # User ID that will trigger the "su" segment. Defaults to root.
-root-id = 0
+var root-id = 0
 
 ######################################################################
-fn -log [@msg]{
+fn -log {|@msg|
 	echo (date) $@msg >> /tmp/powerline-debug.log
 }
 
 # Return the current directory, shortened according to `$prompt-pwd-dir-length`
 fn prompt-pwd {
-	dir = (tilde-abbr $pwd)
+	var dir = (tilde-abbr $pwd)
 	if (> $prompt-pwd-dir-length 0) {
-		dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
+		set dir = (re:replace '(\.?[^/]{'$prompt-pwd-dir-length'})[^/]*/' '$1/' $dir)
 	}
 	str:split / $dir | str:join ' '$glyph[dirchain]' '
 }
 
 fn session-color-picker {
   if (>= (% (- $segment-style-bg[arrow] 16) 36) 18) {
-    segment-style-fg[arrow] = 232
+    set segment-style-fg[arrow] = 232
   } else {
-    segment-style-fg[arrow] = 255
+    set segment-style-fg[arrow] = 255
   }
 }
 
 ######################################################################
 fn -prompt-builder {
 	# last-bg is the background color of the last printed segment
-	last-bg = $segment-style-bg[default]
+	var last-bg = $segment-style-bg[default]
 
-	fn -colorprint [what fg bg]{
-		fn st [seg]{
+	fn -colorprint {|what fg bg|
+		fn st {|seg|
 			if (eq $bg "transparent") {
 				styled-segment $seg &fg-color="color"$fg
 			} else {
@@ -153,21 +153,21 @@ fn -prompt-builder {
 			}
 		}
 		styled $what $st~
-		last-bg = $bg
+		set last-bg = $bg
 	}
 
 	# Build a prompt segment in the given style, surrounded by square brackets
-	fn prompt-segment [fg bg @texts]{
-		text = $glyph[prefix](str:join ' ' $texts)$glyph[suffix]
+	fn prompt-segment {|fg bg @texts|
+		var text = $glyph[prefix](str:join ' ' $texts)$glyph[suffix]
 		-colorprint $text $fg $bg
 	}
 
 	######################################################################
 	# cached git status
-	last-git-status = [&]
+	var last-git-status = [&]
 
 	fn -parse-git {
-		last-git-status = (git:status &counts=$true)
+		set last-git-status = (git:status &counts=$true)
 	}
 
 	######################################################################
@@ -194,10 +194,10 @@ fn -prompt-builder {
 	}
 
 	fn segment-git-branch {
-		branch = $last-git-status[branch-name]
+		var branch = $last-git-status[branch-name]
 		if (not-eq $branch "") {
 			if (eq $branch '(detached)') {
-				branch = $last-git-status[branch-oid][0..7]
+				set branch = $last-git-status[branch-oid][0..7]
 			}
 			prompt-segment $segment-style-fg[git-branch] $segment-style-bg[git-branch] $glyph[git-branch] $branch$glyph[suffix]
 		}
@@ -216,7 +216,7 @@ fn -prompt-builder {
 	}
 
 	fn segment-git-staged {
-		total-staged = (+ $last-git-status[staged-modified-count staged-deleted-count staged-added-count renamed-count copied-count])
+		var total-staged = (+ $last-git-status[staged-modified-count staged-deleted-count staged-added-count renamed-count copied-count])
 		if (> $total-staged 0) {
 			prompt-segment $segment-style-fg[git-staged] $segment-style-bg[git-staged] $total-staged$glyph[git-staged]
 		}
@@ -235,7 +235,7 @@ fn -prompt-builder {
 	}
 
 	fn segment-arrow {
-		uid = (id -u)
+		var uid = (id -u)
 		if (eq $uid $root-id) {
 			prompt-segment $segment-style-fg[su] $segment-style-bg[su] $glyph[su]
 		} else {
@@ -254,7 +254,7 @@ fn -prompt-builder {
 	}
 
 	# List of built-in segments
-	segment = [
+	var segment = [
 		&newline= $segment-newline~
 		&dir= $segment-dir~
 		&user= $segment-user~
@@ -274,8 +274,8 @@ fn -prompt-builder {
 	# Given a segment specification, return the appropriate value, depending
 	# on whether it's the name of a built-in segment, a lambda, a string
 	# or an styled
-	fn -interpret-segment [seg]{
-		k = (kind-of $seg)
+	fn -interpret-segment {|seg|
+		var k = (kind-of $seg)
 		if (eq $k fn) {
 			# If it's a lambda, run it
 			$seg
@@ -294,18 +294,18 @@ fn -prompt-builder {
 	}
 
 	# Return a string of values, including the appropriate chain connectors
-	fn -build-chain [segments]{
+	fn -build-chain {|segments|
 		if (== (count $segments) 0) {
 			return
 		}
 
-		first = $true
-		output = ""
+		var first = $true
+		var output = ""
 		-parse-git
 
 		for seg $segments {
-			lbg = $last-bg
-			measured-time = (time { output = [(-interpret-segment $seg)] })
+			var lbg = $last-bg
+			var measured-time = (time { set output = [(-interpret-segment $seg)] })
 			# -log $pwd segment-$seg $measured-time
 			if (> (count $output) 0) {
 				if (not $first) {
@@ -317,9 +317,9 @@ fn -prompt-builder {
 				}
 				put $@output
 				if (not (eq $seg "newline")) {
-					first = $false
+					set first = $false
 				} else {
-					first = $true
+					set first = $true
 				}
 			}
 		}
@@ -329,8 +329,8 @@ fn -prompt-builder {
 	put $-build-chain~
 }
 
--build-prompt~ = (-prompt-builder)
--build-rprompt~ = (-prompt-builder)
+var -build-prompt~ = (-prompt-builder)
+var -build-rprompt~ = (-prompt-builder)
 
 # Prompt and rprompt functions (careful, they will be executed concurrently)
 fn prompt {
@@ -344,8 +344,8 @@ fn rprompt {
 # Default init, assigning our functions to `edit:prompt` and `edit:rprompt`
 fn init {
 	session-color-picker
-	edit:prompt = $prompt~
-	edit:rprompt = $rprompt~
+	set edit:prompt = $prompt~
+	set edit:rprompt = $rprompt~
 }
 
 init
