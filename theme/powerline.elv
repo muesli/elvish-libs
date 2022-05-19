@@ -8,13 +8,10 @@
 #   use epm
 #   epm:install github.com/muesli/elvish-libs
 #
-# Then add the following lines to your ~/.elvish/rc.elv file:
-#   use github.com/muesli/elvish-libs/theme/powerline
-#   powerline:setup
-#
-# You can also assign the prompt functions manually instead of calling `powerline:setup`:
-#   edit:prompt = $powerline:&prompt
-#   edit:rprompt = $powerline:&rprompt
+# Then add the following lines to your rc.elv file:
+#	use github.com/muesli/elvish-libs/theme/powerline
+#	edit:prompt-stale-transform = [x]{ put $x }
+#	edit:rprompt-stale-transform = [x]{ put $x }
 #
 # The chains on both sides can be configured by assigning to `powerline:prompt-segments` and
 # `powerline:rprompt-segments`, respectively. These variables must be arrays, and the given
