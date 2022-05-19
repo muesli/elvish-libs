@@ -17,10 +17,12 @@ epm:install github.com/muesli/elvish-libs
 
 ![powerline](screenshots/powerline.png)
 
-To use the `powerline` theme, put this line in your `~/.elvish/rc.elv`:
+To use the `powerline` theme, put this line in your `rc.elv`:
 
 ```
 use github.com/muesli/elvish-libs/theme/powerline
+edit:prompt-stale-transform = [x]{ put $x }
+edit:rprompt-stale-transform = [x]{ put $x }
 ```
 
 ## Modules
