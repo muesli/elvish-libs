@@ -21,8 +21,8 @@ To use the `powerline` theme, put this line in your `rc.elv`:
 
 ```
 use github.com/muesli/elvish-libs/theme/powerline
-edit:prompt-stale-transform = [x]{ put $x }
-edit:rprompt-stale-transform = [x]{ put $x }
+set edit:prompt-stale-transform = {|x| put $x }
+set edit:rprompt-stale-transform = {|x| put $x }
 ```
 
 ## Modules
