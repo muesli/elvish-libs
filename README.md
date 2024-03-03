@@ -3,7 +3,7 @@ Libs & Themes for [elvish](https://github.com/elves/elvish)
 
 ## Install
 
-Make sure you run elvish 0.11 or newer. Install this module by running the
+Make sure you run elvish 0.20 or newer. Install this module by running the
 following commands in your shell:
 
 ```
