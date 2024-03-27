@@ -53,7 +53,7 @@ fn status {|&counts=$false|
   var rev-behind      = 0
   var is-git-repo     = $false
 
-  var is-ok = ?($git-status-cmd | eawk {|line @f|
+  var is-ok = ?($git-status-cmd | re:awk {|line @f|
       # pprint "@f=" $f
       -switch $f[0] [
         &"#"= {
